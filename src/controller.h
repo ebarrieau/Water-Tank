@@ -15,21 +15,27 @@ public:
     float getWeight();
 private:
   float currentWeight;
-  float maxWeight = 1000;
+  float maxWeight = 1500;
   float maxIncWeight = 100;
-  float minPumpWeight = 450;
+  float minPumpWeight = 500;
   float targetIncWeight = 0;
   char error = 0;
+  float hysteresis = 20;
   struct DateTime minRechargeTime = {0,0,0,0,1,0,0}; // 1 hour
   struct DateTime maxRunTime = {0,0,0,0,0,5,0}; // 5 minutes
   struct DateTime nextOnTime;
   struct DateTime nextOffTime;
+  struct DateTime pumpTimeout = {0,0,0,0,0,5,0};
+  struct DateTime pumpOffTime;
   const unsigned int solenoidPin;
   const unsigned int pumpPin;
   const unsigned int scalePin;
   void updateCurrentWeight();
   void turnWaterOn();
   void turnWaterOff();
+  void turnPumpOn();
+  void turnPumpOff();
+  void managePump();
   void manageWater();
 
 };
