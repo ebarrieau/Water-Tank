@@ -22,6 +22,7 @@ void Controller::setup() {
   char dateResult = getDateTime(currentTime);
   if (!dateResult) {
     nextOnTime = addDate(currentTime, startDelay);
+    pumpOffTime = currentTime;
   } else {
     error = dateResult;
   }
@@ -64,12 +65,48 @@ void Controller::turnWaterOff() {
   digitalWrite(solenoidPin, LOW);
 }
 
+void Controller::turnPumpOn() {
+  if (digitalRead(pumpPin) && !error) { //if pump is already on and no errors, do nothing
+    return;
+  }
+
+  if (!error) {
+    struct DateTime now;
+    char result = getDateTime(now);
+    if (result) {
+      struct DateTime onDelay = addDate(pumpOffTime, pumpTimeout);
+      if (isDateElapsed(now, onDelay)) {
+        digitalWrite(pumpPin, HIGH);
+      }
+    } else {
+      error = result;
+      turnPumpOff();
+      return;
+    }
+
+  } else {
+    turnPumpOff();
+  }
+}
+
+void Controller::turnPumpOff() {
+  if (!digitalRead(pumpPin)) { //if pump is alread off, do nothing
+    return;
+  } else { //if pump is on, set the pump off time for the timeout
+    char result = getDateTime(pumpOffTime);
+    if (!result) {
+      error = result;
+    }
+  }
+  digitalWrite(pumpPin, LOW);
+}
+
 void Controller::manageWater() {
   if (error) {
     turnWaterOff();
     return;
   }
-  if (currentWeight > maxWeight) {
+  if (currentWeight >= maxWeight) {
     turnWaterOff();
     return;
   }
@@ -89,8 +126,10 @@ void Controller::manageWater() {
     return;
   }
 
-  if (isDateElapsed(now, nextOnTime)) {
-    turnWaterOn();
+  if (isDateElapsed(now, nextOnTime)) { //only turn on if min recharge time has elapsed
+    if (currentWeight < (maxWeight - hysteresis)) { // only turn on if we are well below max volume this helps stop solenoid from short cycling
+      turnWaterOn();
+    }
   }
 
 }
@@ -99,9 +138,21 @@ void Controller::manageWater() {
   return currentWeight;
 }
 
+void Controller::managePump() {
+  if (error) {
+    turnWaterOff();
+    return;
+  }
+  if (currentWeight <= minPumpWeight) {
+    turnWaterOff();
+    return;
+  } else if (currentWeight >= (minPumpWeight + hysteresis)) {
+    turnWaterOn();
+  }
+}
+
 void Controller::update() {
   updateCurrentWeight();
   manageWater();
-
-  // digitalWrite(pumpPin, (currentWeight >= minPumpWeight));
+  managePump();
 }
