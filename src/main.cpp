@@ -34,9 +34,7 @@ void setup() {
     tank.setup();
   } else {
     Serial.println("RTC Failed to initialize.");
-    while (true) {
-      delay(1);
-    }
+    delayForever();
   }
 
 
