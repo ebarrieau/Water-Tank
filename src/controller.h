@@ -12,10 +12,11 @@ public:
   Controller(unsigned int solenoidPin, unsigned int pumpPin, unsigned int scalePin);
   void setup();
   void update();
-    float getWeight();
+  float getWeight();
+
 private:
   float currentWeight;
-  float maxWeight = 1500;
+  float maxWeight = 2500;
   float maxIncWeight = 100;
   float minPumpWeight = 500;
   float targetIncWeight = 0;
