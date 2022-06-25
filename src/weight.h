@@ -3,8 +3,7 @@
 
 #include "helper.h"
 
-uint16_t convertWeight(int val);
-// float convertWeight(int val);
-// float convertFourToTwenty(int val, int lowCal, int highCal);
+float convertWeight(int val);
+float convertFourToTwenty(int val, int lowCal, int highCal);
 
 #endif
