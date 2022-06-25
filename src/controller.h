@@ -12,13 +12,15 @@ public:
   Controller(unsigned int solenoidPin, unsigned int pumpPin, unsigned int scalePin);
   void setup();
   void update();
-    float getWeight();
+  uint16_t getWeight() { return currentWeight; };
+  bool getPumpState() { return digitalRead(pumpPin); };
+  bool getSolenoidState() { return digitalRead(solenoidPin); }
 private:
-  float currentWeight;
-  float maxWeight = 1500;
-  float maxIncWeight = 100;
-  float minPumpWeight = 500;
-  float targetIncWeight = 0;
+  uint16_t currentWeight;
+  uint16_t maxWeight = 15000; //1,500.0 - first digit represents one decimal place
+  uint16_t maxIncWeight = 1000;
+  uint16_t minPumpWeight = 5000;
+  uint16_t targetIncWeight = 0;
   char error = 0;
   float hysteresis = 20;
   struct DateTime minRechargeTime = {0,0,0,0,1,0,0}; // 1 hour

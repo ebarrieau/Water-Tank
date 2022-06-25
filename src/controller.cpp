@@ -18,7 +18,7 @@ void Controller::setup() {
   updateCurrentWeight();
   targetIncWeight = currentWeight + maxIncWeight;
   struct DateTime currentTime;
-  struct DateTime startDelay = {0,0,0,0,0,0,30}; //5 minutes
+  struct DateTime startDelay = {0,0,0,0,1,0,0}; //1 hour
   char dateResult = getDateTime(currentTime);
   if (!dateResult) {
     nextOnTime = addDate(currentTime, startDelay);
@@ -132,10 +132,6 @@ void Controller::manageWater() {
     }
   }
 
-}
-
- float Controller::getWeight() {
-  return currentWeight;
 }
 
 void Controller::managePump() {
