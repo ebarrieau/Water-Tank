@@ -42,7 +42,7 @@ void TankModbusServer::setup() {
 
   modbusTCPServer.configureCoils(0x00, 2);
   modbusTCPServer.configureDiscreteInputs(0x00, 2);
-  modbusTCPServer.configureInputRegisters(0x00, 2);
+  modbusTCPServer.configureInputRegisters(0x00, 3);
   modbusTCPServer.configureHoldingRegisters(0x00, 6);
 }
 
@@ -50,11 +50,12 @@ void TankModbusServer::updateInputs() {
   modbusTCPServer.discreteInputWrite(0x00, tank->getPumpState());
   modbusTCPServer.discreteInputWrite(0x01, tank->getSolenoidState());
   modbusTCPServer.inputRegisterWrite(0x00, tank->getWeight());
+  modbusTCPServer.inputRegisterWrite(0x02, tank->getTargetWeight());
 }
 
 void TankModbusServer::poll() {
   updateInputs();
-  
+
   if (!client) {
     client = ethServer.available();
     if (client) {

@@ -136,14 +136,14 @@ void Controller::manageWater() {
 
 void Controller::managePump() {
   if (error) {
-    turnWaterOff();
+    turnPumpOff();
     return;
   }
   if (currentWeight <= minPumpWeight) {
-    turnWaterOff();
+    turnPumpOff();
     return;
   } else if (currentWeight >= (minPumpWeight + hysteresis)) {
-    turnWaterOn();
+    turnPumpOn();
   }
 }
 
