@@ -28,7 +28,7 @@ private:
   struct DateTime maxRunTime = {0,0,0,0,0,5,0}; // 5 minutes
   struct DateTime nextOnTime;
   struct DateTime nextOffTime;
-  struct DateTime pumpTimeout = {0,0,0,0,0,5,0};
+  struct DateTime pumpTimeout = {0,0,0,0,0,0,10};
   struct DateTime pumpOffTime;
   const unsigned int solenoidPin;
   const unsigned int pumpPin;

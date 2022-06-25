@@ -1,7 +1,5 @@
 //Standard libraries
 #include "SPI.h"
-#include "Ethernet.h"
-
 
 //Third Party Libraries
 #include "Controllino.h"
@@ -13,6 +11,7 @@
 #include "modbusServer.h"
 
 Controller tank(CONTROLLINO_R2, CONTROLLINO_R0, CONTROLLINO_AI12);
+
 TankModbusServer modServer(&tank,
                           0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED,
                           10,0,10,10);
