@@ -18,7 +18,7 @@ void Controller::setup() {
   updateCurrentWeight();
   targetIncWeight = currentWeight + maxIncWeight;
   struct DateTime currentTime;
-  struct DateTime startDelay = {0,0,0,0,0,0,30}; //30 seconds
+  struct DateTime startDelay = {0,0,0,0,0,10,0}; //30 seconds
   char dateResult = getDateTime(currentTime);
   if (!dateResult) {
     nextOnTime = addDate(currentTime, startDelay);
@@ -73,7 +73,7 @@ void Controller::turnPumpOn() {
   if (!error) {
     struct DateTime now;
     char result = getDateTime(now);
-    if (result) {
+    if (!result) {
       struct DateTime onDelay = addDate(pumpOffTime, pumpTimeout);
       if (isDateElapsed(now, onDelay)) {
         digitalWrite(pumpPin, HIGH);
@@ -146,7 +146,7 @@ void Controller::managePump() {
   if (currentWeight <= minPumpWeight) {
     turnPumpOff();
     return;
-  } else if (currentWeight >= (minPumpWeight + hysteresis)) {
+  } else if (currentWeight > (minPumpWeight + hysteresis)) {
     turnPumpOn();
   }
 }
