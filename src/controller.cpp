@@ -18,7 +18,7 @@ void Controller::setup() {
   updateCurrentWeight();
   targetIncWeight = currentWeight + maxIncWeight;
   struct DateTime currentTime;
-  struct DateTime startDelay = {0,0,0,0,1,0,0}; //1 hour
+  struct DateTime startDelay = {0,0,0,0,0,10,0}; //30 seconds
   char dateResult = getDateTime(currentTime);
   if (!dateResult) {
     nextOnTime = addDate(currentTime, startDelay);
@@ -134,6 +134,10 @@ void Controller::manageWater() {
 
 }
 
+ float Controller::getWeight() {
+  return currentWeight;
+}
+
 void Controller::managePump() {
   if (error) {
     turnPumpOff();
@@ -142,7 +146,6 @@ void Controller::managePump() {
   if (currentWeight <= minPumpWeight) {
     turnPumpOff();
     return;
-
   } else if (currentWeight > (minPumpWeight + hysteresis)) {
     turnPumpOn();
   }
