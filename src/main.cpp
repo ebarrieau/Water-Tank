@@ -5,16 +5,18 @@
 #include "Controllino.h"
 
 //Private Includes
+#include "network.h"
 #include "time.h"
 #include "weight.h"
 #include "controller.h"
 #include "modbusServer.h"
+#include "modbusWellClient.h"
 
 Controller tank(CONTROLLINO_R2, CONTROLLINO_R0, CONTROLLINO_AI12);
 
-TankModbusServer modServer(&tank,
-                          0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED,
-                          10,0,10,10);
+WellModbusClient wellClient(&tank, IPAddress(10,0,10,11), 502, 11);
+TankModbusServer modServer(&tank, 502);
+
 
 void setup() {
 
@@ -24,6 +26,9 @@ void setup() {
   }
   char rtcInit = Controllino_RTC_init();
   if (!rtcInit) {
+    struct NetworkSettings networkSettings = {{0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
+                                              IPAddress(10,0,10,10)};
+    networkSetup(networkSettings);
     tank.setup();
     modServer.setup();
   } else {
@@ -35,6 +40,14 @@ void setup() {
 
 void loop() {
 
-  tank.update();
+  struct DateTime now;
+  char result = getDateTime(now);
+  if (result) {
+    tank.setError(result);
+  }
+  tank.update(now);
+  wellClient.poll(now);
   modServer.poll();
+
+
 }

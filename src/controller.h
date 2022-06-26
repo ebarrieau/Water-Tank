@@ -11,14 +11,18 @@ class Controller
 public:
   Controller(unsigned int solenoidPin, unsigned int pumpPin, unsigned int scalePin);
   void setup();
-  void update();
+  void update(struct DateTime now);
+  void setError(char err) {error = err; };
   uint16_t getWeight() { return currentWeight; };
   bool getPumpState() { return digitalRead(pumpPin); };
   bool getSolenoidState() { return digitalRead(solenoidPin); };
   uint16_t getTargetWeight() { return targetIncWeight; };
+  void setWellDepth(float depth) { currentWellDepth = depth;};
+  float getWellDepth() {return currentWellDepth;};
 private:
   uint16_t currentWeight;
-  uint16_t maxWeight = 25000; //2,500.0 - first digit represents one decimal place
+  float currentWellDepth;
+  uint16_t maxWeight = 40000; //4,000.0 - first digit represents one decimal place
   uint16_t maxIncWeight = 1000;
   uint16_t minPumpWeight = 5000;
   uint16_t targetIncWeight = 0;
@@ -34,12 +38,12 @@ private:
   const unsigned int pumpPin;
   const unsigned int scalePin;
   void updateCurrentWeight();
-  void turnWaterOn();
-  void turnWaterOff();
-  void turnPumpOn();
-  void turnPumpOff();
-  void managePump();
-  void manageWater();
+  void turnWaterOn(struct DateTime now);
+  void turnWaterOff(struct DateTime now);
+  void turnPumpOn(struct DateTime now);
+  void turnPumpOff(struct DateTime now);
+  void managePump(struct DateTime now);
+  void manageWater(struct DateTime now);
 
 };
 #endif

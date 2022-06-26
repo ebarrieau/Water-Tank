@@ -34,122 +34,94 @@ void Controller::updateCurrentWeight() {
   currentWeight = convertWeight(loadCellRaw);
 }
 
-void Controller::turnWaterOn() {
+void Controller::turnWaterOn(struct DateTime now) {
   if (!digitalRead(solenoidPin)) {
     targetIncWeight = currentWeight + maxIncWeight;
-    struct DateTime now;
-    char result = getDateTime(now);
-    if (!result) {
-      nextOffTime = addDate(now, maxRunTime);
-    } else {
-      error = result;
-    }
+    nextOffTime = addDate(now, maxRunTime);
   }
-  if (!error) {
-    digitalWrite(solenoidPin, HIGH);
-  } else {
-    turnWaterOff();
+  if (error) {
+    turnWaterOff(now);
+    return;
   }
+  digitalWrite(solenoidPin, HIGH);
 }
 
-void Controller::turnWaterOff() {
+void Controller::turnWaterOff(struct DateTime now) {
   if (digitalRead(solenoidPin)) {
-    struct DateTime now;
-    char result = getDateTime(now);
-    if (!result) {
-      nextOnTime = addDate(now, minRechargeTime);
-    } else {
-      error = result;
-    }
+    nextOnTime = addDate(now, minRechargeTime);
   }
   digitalWrite(solenoidPin, LOW);
 }
 
-void Controller::turnPumpOn() {
+void Controller::turnPumpOn(struct DateTime now) {
   if (digitalRead(pumpPin) && !error) { //if pump is already on and no errors, do nothing
     return;
   }
 
-  if (!error) {
-    struct DateTime now;
-    char result = getDateTime(now);
-    if (!result) {
-      struct DateTime onDelay = addDate(pumpOffTime, pumpTimeout);
-      if (isDateElapsed(now, onDelay)) {
-        digitalWrite(pumpPin, HIGH);
-      }
-    } else {
-      error = result;
-      turnPumpOff();
-      return;
-    }
-
-  } else {
-    turnPumpOff();
+  if (error) {
+    turnPumpOff(now);
+    return;
   }
+
+  struct DateTime onDelay = addDate(pumpOffTime, pumpTimeout);
+  if (isDateElapsed(now, onDelay)) {
+    digitalWrite(pumpPin, HIGH);
+  }
+
 }
 
-void Controller::turnPumpOff() {
+void Controller::turnPumpOff(struct DateTime now) {
   if (!digitalRead(pumpPin)) { //if pump is alread off, do nothing
     return;
   } else { //if pump is on, set the pump off time for the timeout
-    char result = getDateTime(pumpOffTime);
-    if (!result) {
-      error = result;
-    }
+    pumpOffTime = now;
   }
   digitalWrite(pumpPin, LOW);
 }
 
-void Controller::manageWater() {
+void Controller::manageWater(struct DateTime now) {
   if (error) {
-    turnWaterOff();
+    turnWaterOff(now);
     return;
   }
   if (currentWeight >= maxWeight) {
-    turnWaterOff();
+    turnWaterOff(now);
     return;
   }
   if (digitalRead(solenoidPin) && currentWeight > targetIncWeight) {
-    turnWaterOff();
+    turnWaterOff(now);
     return;
   }
 
-  struct DateTime now;
-  char dateResult = getDateTime(now);
-  if (dateResult) {
-    error = dateResult;
-    return;
-  }
   if (digitalRead(solenoidPin) && isDateElapsed(now, nextOffTime)) {
-    turnWaterOff();
+    turnWaterOff(now);
     return;
   }
 
   if (isDateElapsed(now, nextOnTime)) { //only turn on if min recharge time has elapsed
     if (currentWeight < (maxWeight - hysteresis)) { // only turn on if we are well below max volume this helps stop solenoid from short cycling
-      turnWaterOn();
+      turnWaterOn(now);
     }
   }
 
 }
 
-void Controller::managePump() {
+void Controller::managePump(struct DateTime now) {
   if (error) {
-    turnPumpOff();
+    turnPumpOff(now);
     return;
   }
   if (currentWeight <= minPumpWeight) {
-    turnPumpOff();
+    turnPumpOff(now);
     return;
 
   } else if (currentWeight > (minPumpWeight + hysteresis)) {
-    turnPumpOn();
+    turnPumpOn(now);
   }
 }
 
-void Controller::update() {
+void Controller::update(struct DateTime now) {
   updateCurrentWeight();
-  manageWater();
-  managePump();
+  manageWater(now);
+  managePump(now);
 }
