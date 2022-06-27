@@ -20,6 +20,6 @@ char getDateTime(struct DateTime &dt);
 void printTime(struct DateTime dt);
 struct DateTime addDate(struct DateTime baseDate, struct DateTime addDate);
 bool isDateElapsed(struct DateTime current, struct DateTime target);
-long subtractTime(struct DateTime x, struct DateTime y);
+// long subtractTime(struct DateTime x, struct DateTime y);
 
 #endif

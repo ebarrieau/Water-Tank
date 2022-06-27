@@ -18,7 +18,7 @@ void Controller::setup() {
   updateCurrentWeight();
   targetIncWeight = currentWeight + maxIncWeight;
   struct DateTime currentTime;
-  struct DateTime startDelay = {0,0,0,0,1,0,0}; //1 hour
+  struct DateTime startDelay = {0,0,0,0,0,0,30}; //30 seconds
   char dateResult = getDateTime(currentTime);
   if (!dateResult) {
     nextOnTime = addDate(currentTime, startDelay);
@@ -36,8 +36,11 @@ void Controller::updateCurrentWeight() {
 
 void Controller::turnWaterOn(struct DateTime now) {
   if (!digitalRead(solenoidPin)) {
-    targetIncWeight = currentWeight + maxIncWeight;
+    targetIncWeight = currentWeight + currentIncWeightTarget;
     nextOffTime = addDate(now, maxRunTime);
+    Serial.print(currentWeight);
+    Serial.print(", ");
+    Serial.println(targetIncWeight);
   }
   if (error) {
     turnWaterOff(now);
@@ -93,6 +96,11 @@ void Controller::manageWater(struct DateTime now) {
     return;
   }
 
+  if (currentWellDepth > 1000) {
+    turnWaterOff(now);
+    return;
+  }
+
   if (digitalRead(solenoidPin) && isDateElapsed(now, nextOffTime)) {
     turnWaterOff(now);
     return;
@@ -100,6 +108,14 @@ void Controller::manageWater(struct DateTime now) {
 
   if (isDateElapsed(now, nextOnTime)) { //only turn on if min recharge time has elapsed
     if (currentWeight < (maxWeight - hysteresis)) { // only turn on if we are well below max volume this helps stop solenoid from short cycling
+      struct DateTime wellGoodUntil = addDate(lastGoodWellTime, wellTimeout);
+      if (!isDateElapsed(now, wellGoodUntil)) { //if the good until time has not elapsed, we trust the well depth and calculate a target weight
+        uint16_t availableWater = (1000 - currentWellDepth) * 1.5 * 8.33; //height between limit and current * gallons/foot * weight/gallon * 10 (fixed point 1 decimal)
+        currentIncWeightTarget = min(availableWater, maxIncWeight);
+      } else { //Otherwise we use a conservative default of 100.0 lbs
+        currentIncWeightTarget = 1000;
+      }
+
       turnWaterOn(now);
     }
   }

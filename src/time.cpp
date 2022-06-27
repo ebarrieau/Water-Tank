@@ -94,18 +94,3 @@ bool isDateElapsed(struct DateTime current, struct DateTime target) {
 
   return 0;
 }
-
-long subtractTime(struct DateTime x, struct DateTime y) {
-
-
-  int hour = (x.hour - y.hour) * 60;
-  if (x.hour < y.hour) {
-    hour = (x.hour + 24 - y.hour);
-  }
-  int minute = (x.minute - y.minute);
-  if (x.minute < y.minute) {
-    minute = (x.minute + 60 - y.minute);
-  }
-
-  return (hour + minute);
-}

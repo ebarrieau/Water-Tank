@@ -14,7 +14,7 @@
 
 Controller tank(CONTROLLINO_R2, CONTROLLINO_R0, CONTROLLINO_AI12);
 
-WellModbusClient wellClient(&tank, IPAddress(10,0,10,11), 502, 11);
+WellModbusClient wellClient(&tank, 11, IPAddress(10,0,10,11), 502);
 TankModbusServer modServer(&tank, 502);
 
 

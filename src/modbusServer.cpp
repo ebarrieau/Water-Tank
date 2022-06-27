@@ -27,11 +27,14 @@ void TankModbusServer::updateInputs() {
   modbusTCPServer.discreteInputWrite(0x01, tank->getSolenoidState());
   modbusTCPServer.inputRegisterWrite(0x00, tank->getWeight());
 
-  float wellDepth = tank->getWellDepth();
-  uint16_t highWord = (uint32_t)wellDepth >> 16;
-  uint16_t lowWord = (uint32_t)wellDepth && 0xFFFF;
-  modbusTCPServer.inputRegisterWrite(0x01, highWord);
-  modbusTCPServer.inputRegisterWrite(0x02, lowWord);
+  // float depthFloat = tank->getWellDepth();
+  // uint32_t depthInt;
+  // memcpy(&depthInt, &depthFloat, sizeof(depthInt));
+  // uint16_t highWord = depthInt >> 16;
+  // uint16_t lowWord = depthInt & 0xFFFF;
+
+  modbusTCPServer.inputRegisterWrite(0x01, tank->getWellDepth());
+  modbusTCPServer.inputRegisterWrite(0x02, tank->getTargetWeight());
 }
 
 void TankModbusServer::poll() {

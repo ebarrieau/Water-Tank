@@ -13,27 +13,36 @@ WellModbusClient::WellModbusClient(Controller *tank,
 
 }
 
-void WellModbusClient::readDepth() {
-  modbusTcpClient.requestFrom(unitId, 101, 2);
+void WellModbusClient::readDepth(struct DateTime now) {
+  if(!modbusTcpClient.requestFrom(unitId, HOLDING_REGISTERS, 101, 2)){
+    // Serial.print("Read Depth Failed");
+    // Serial.println(modbusTcpClient.lastError());
+    return;
+  }
   uint16_t data[2];
   unsigned int i = 0;
   while (modbusTcpClient.available()){
     data[i++] = modbusTcpClient.read();
   }
-  tank->setWellDepth((float) ((uint32_t) data[0] << 16 || data[1]));
+  uint32_t depthInt = (uint32_t) data[1] << 16 | data[0];
+  float depthFloat;
+  memcpy(&depthFloat, &depthInt, sizeof(depthFloat));
+  depthFloat = depthFloat * 10;
+
+  tank->setWellDepth((uint16_t) depthFloat);
+  tank->setWellGoodTime(now);
 }
 
 void WellModbusClient::poll(struct DateTime now) {
   if (!modbusTcpClient.connected()) {
     // client not connected, start the Modbus TCP client
     modbusTcpClient.begin(ip, port);
-    lastPollTime = now;
   } else {
     // client connected
-
     struct DateTime nextMeasurementTime = addDate(lastPollTime, pollTime);
     if (isDateElapsed(now, nextMeasurementTime)) {
-      readDepth();
+      readDepth(now);
+      lastPollTime = now;
     }
   }
 }
