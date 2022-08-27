@@ -16,7 +16,7 @@ public:
                    uint8_t unitId,
                    IPAddress ip,
                    uint16_t port = 502);
-  void poll(struct DateTime now);
+  void poll(long now);
 
 private:
   Controller *tank;
@@ -24,10 +24,10 @@ private:
   IPAddress ip;
   uint16_t port;
   struct DateTime pollTime = {0,0,0,0,0,0,2}; // 2 seconds
-  struct DateTime lastPollTime = {0,0,0,0,0,0,0};
+  long lastPollTime = 0;
   EthernetClient ethClient;
   ModbusTCPClient modbusTcpClient;
-  int readDepth(struct DateTime now);
+  int readDepth(long now);
 
 };
 

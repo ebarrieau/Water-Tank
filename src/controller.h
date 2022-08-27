@@ -11,7 +11,7 @@ class Controller
 public:
   Controller(unsigned int solenoidPin, unsigned int pumpPin, unsigned int scalePin);
   void setup();
-  void update(struct DateTime now);
+  void update(long now);
   void setError(char err) {error = err; };
   uint16_t getWeight() { return currentWeight; };
   bool getPumpState() { return digitalRead(pumpPin); };
@@ -19,12 +19,12 @@ public:
   uint16_t getTargetWeight() { return targetIncWeight; };
   void setWellDepth(uint16_t depth) { currentWellDepth = depth;};
   float getWellDepth() {return currentWellDepth; };
-  void setWellGoodTime(struct DateTime time) { lastGoodWellTime = time; };
+  void setWellGoodTime(long time) { lastGoodWellTime = time; };
 private:
   uint16_t currentWeight;
   uint16_t currentWellDepth;
   uint16_t maxWeight = 35000; //3,500.0 - first digit represents one decimal place
-  uint16_t maxIncWeight = 2000;
+  uint16_t maxIncWeight = 1000;
   uint16_t currentIncWeightTarget;
   uint16_t minPumpWeight = 5000;
   uint16_t targetIncWeight = 0;
@@ -32,22 +32,22 @@ private:
   uint16_t hysteresis = 20;
   struct DateTime minRechargeTime = {0,0,0,0,1,0,0}; // 1 hour
   struct DateTime maxRunTime = {0,0,0,0,0,5,0}; // 5 minutes
-  struct DateTime nextOnTime;
-  struct DateTime nextOffTime;
-  struct DateTime pumpTimeout = {0,0,0,0,1,0,0};
-  struct DateTime pumpOffTime;
-  struct DateTime lastGoodWellTime;
+  long nextOnTime;
+  long nextOffTime;
+  struct DateTime pumpTimeout = {0,0,0,0,0,0,30}; // 30 seconds
+  long pumpOffTime;
+  long lastGoodWellTime;
   struct DateTime wellTimeout = {0,0,0,0,0,5,0};
   const unsigned int solenoidPin;
   const unsigned int pumpPin;
   const unsigned int scalePin;
   void updateCurrentWeight();
-  void turnWaterOn(struct DateTime now);
-  void turnWaterOff(struct DateTime now);
-  void turnPumpOn(struct DateTime now);
-  void turnPumpOff(struct DateTime now);
-  void managePump(struct DateTime now);
-  void manageWater(struct DateTime now);
+  void turnWaterOn(long now);
+  void turnWaterOff(long now);
+  void turnPumpOn(long now);
+  void turnPumpOff(long now);
+  void managePump(long now);
+  void manageWater(long now);
 
 };
 #endif

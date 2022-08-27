@@ -16,9 +16,15 @@ struct DateTime {
 
 const uint8_t daysInMonth []  = { 31,28,31,30,31,30,31,31,30,31,30,31 };
 
-char getDateTime(struct DateTime &dt);
-void printTime(struct DateTime dt);
-struct DateTime addDate(struct DateTime baseDate, struct DateTime addDate);
+char getDateTimeStruct(struct DateTime &dt);
+char getDateTimeSeconds(long &time);
+long convertDateSeconds(struct DateTime date);
+// void printTime(struct DateTime dt);
+long addDate(long base, long add);
+long addDate(long base, struct DateTime add);
+long addDate(struct DateTime base, struct DateTime add);
+bool isDateElapsed(long current, long target);
+bool isDateElapsed(long currrent, struct DateTime target);
 bool isDateElapsed(struct DateTime current, struct DateTime target);
 // long subtractTime(struct DateTime x, struct DateTime y);
 

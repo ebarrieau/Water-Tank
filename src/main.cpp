@@ -40,14 +40,14 @@ void setup() {
 
 void loop() {
 
-  struct DateTime now;
-  char result = getDateTime(now);
+  long now;
+  char result = getDateTimeSeconds(now);
   if (result) {
     tank.setError(result);
   }
+  // Serial.println(now);
   tank.update(now);
   wellClient.poll(now);
   modServer.poll();
-
 
 }
