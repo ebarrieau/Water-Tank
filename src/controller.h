@@ -29,7 +29,7 @@ private:
   uint16_t minPumpWeight = 5000;
   uint16_t targetIncWeight = 0;
   char error = 0;
-  uint16_t hysteresis = 20;
+  uint16_t hysteresis = 200;
   struct DateTime minRechargeTime = {0,0,0,0,1,0,0}; // 1 hour
   struct DateTime maxRunTime = {0,0,0,0,0,5,0}; // 5 minutes
   long nextOnTime;
