@@ -12,7 +12,7 @@ void TankModbusServer::setup() {
 
   // start the Modbus TCP server
   if (!modbusTCPServer.begin()) {
-    Serial.println("Failed to start Modbus TCP Server!");
+    // Serial.println("Failed to start Modbus TCP Server!");
     delayForever();
   }
 

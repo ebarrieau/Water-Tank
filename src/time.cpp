@@ -6,7 +6,7 @@ char getDateTime(struct DateTime &dt) {
 }
 
 void printTime(struct DateTime dt) {
-  Serial.println(String(dt.hour) + ":" + String(dt.minute) + ":" + String(dt.second));
+  // Serial.println(String(dt.hour) + ":" + String(dt.minute) + ":" + String(dt.second));
 }
 
 struct DateTime addDate(struct DateTime baseDate, struct DateTime addDate) {

@@ -27,7 +27,7 @@ private:
   struct DateTime lastPollTime = {0,0,0,0,0,0,0};
   EthernetClient ethClient;
   ModbusTCPClient modbusTcpClient;
-  void readDepth(struct DateTime now);
+  int readDepth(struct DateTime now);
 
 };
 

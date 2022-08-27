@@ -23,7 +23,7 @@ public:
 private:
   uint16_t currentWeight;
   uint16_t currentWellDepth;
-  uint16_t maxWeight = 40000; //4,000.0 - first digit represents one decimal place
+  uint16_t maxWeight = 35000; //3,500.0 - first digit represents one decimal place
   uint16_t maxIncWeight = 2000;
   uint16_t currentIncWeightTarget;
   uint16_t minPumpWeight = 5000;

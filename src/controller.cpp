@@ -18,7 +18,7 @@ void Controller::setup() {
   updateCurrentWeight();
   targetIncWeight = currentWeight + maxIncWeight;
   struct DateTime currentTime;
-  struct DateTime startDelay = {0,0,0,0,0,0,30}; //30 seconds
+  struct DateTime startDelay = {0,0,0,0,0,30,0}; //30 minutes
   char dateResult = getDateTime(currentTime);
   if (!dateResult) {
     nextOnTime = addDate(currentTime, startDelay);
@@ -38,9 +38,6 @@ void Controller::turnWaterOn(struct DateTime now) {
   if (!digitalRead(solenoidPin)) {
     targetIncWeight = currentWeight + currentIncWeightTarget;
     nextOffTime = addDate(now, maxRunTime);
-    Serial.print(currentWeight);
-    Serial.print(", ");
-    Serial.println(targetIncWeight);
   }
   if (error) {
     turnWaterOff(now);

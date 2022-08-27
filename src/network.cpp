@@ -6,10 +6,10 @@ void networkSetup(struct NetworkSettings networkSettings) {
 
   // Check for Ethernet hardware present
   if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-    Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+    // Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
     delayForever();
   }
   if (Ethernet.linkStatus() == LinkOFF) {
-    Serial.println("Ethernet cable is not connected.");
+    // Serial.println("Ethernet cable is not connected.");
   }
 }
