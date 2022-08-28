@@ -18,7 +18,7 @@ void TankModbusServer::setup() {
 
   modbusTCPServer.configureCoils(0x00, 2);
   modbusTCPServer.configureDiscreteInputs(0x00, 2);
-  modbusTCPServer.configureInputRegisters(0x00, 3);
+  modbusTCPServer.configureInputRegisters(0x00, 5);
   modbusTCPServer.configureHoldingRegisters(0x00, 6);
 }
 
@@ -35,6 +35,10 @@ void TankModbusServer::updateInputs() {
 
   modbusTCPServer.inputRegisterWrite(0x01, tank->getWellDepth());
   modbusTCPServer.inputRegisterWrite(0x02, tank->getTargetWeight());
+  uint16_t lowWord = tank->getWellGoodTime() >> 16;
+  uint16_t highWord = tank->getWellGoodTime() & 0xFFFF;
+  modbusTCPServer.inputRegisterWrite(0x03, highWord);
+  modbusTCPServer.inputRegisterWrite(0x04, lowWord);
 }
 
 void TankModbusServer::poll() {

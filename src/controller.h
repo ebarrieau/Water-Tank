@@ -11,7 +11,7 @@ class Controller
 public:
   Controller(unsigned int solenoidPin, unsigned int pumpPin, unsigned int scalePin);
   void setup();
-  void update(long now);
+  void update(uint32_t now);
   void setError(char err) {error = err; };
   uint16_t getWeight() { return currentWeight; };
   bool getPumpState() { return digitalRead(pumpPin); };
@@ -19,7 +19,8 @@ public:
   uint16_t getTargetWeight() { return targetIncWeight; };
   void setWellDepth(uint16_t depth) { currentWellDepth = depth;};
   float getWellDepth() {return currentWellDepth; };
-  void setWellGoodTime(long time) { lastGoodWellTime = time; };
+  void setWellGoodTime(uint32_t time) { lastGoodWellTime = time; };
+  uint32_t getWellGoodTime() { return lastGoodWellTime; };
 private:
   uint16_t currentWeight;
   uint16_t currentWellDepth;
@@ -29,25 +30,25 @@ private:
   uint16_t minPumpWeight = 5000;
   uint16_t targetIncWeight = 0;
   char error = 0;
-  uint16_t hysteresis = 200;
+  uint16_t hysteresis = 500;
   struct DateTime minRechargeTime = {0,0,0,0,1,0,0}; // 1 hour
   struct DateTime maxRunTime = {0,0,0,0,0,5,0}; // 5 minutes
-  long nextOnTime;
-  long nextOffTime;
+  uint32_t nextOnTime;
+  uint32_t nextOffTime;
   struct DateTime pumpTimeout = {0,0,0,0,0,0,30}; // 30 seconds
-  long pumpOffTime;
-  long lastGoodWellTime;
+  uint32_t pumpOffTime;
+  uint32_t lastGoodWellTime;
   struct DateTime wellTimeout = {0,0,0,0,0,5,0};
   const unsigned int solenoidPin;
   const unsigned int pumpPin;
   const unsigned int scalePin;
   void updateCurrentWeight();
-  void turnWaterOn(long now);
-  void turnWaterOff(long now);
-  void turnPumpOn(long now);
-  void turnPumpOff(long now);
-  void managePump(long now);
-  void manageWater(long now);
+  void turnWaterOn(uint32_t now);
+  void turnWaterOff(uint32_t now);
+  void turnPumpOn(uint32_t now);
+  void turnPumpOff(uint32_t now);
+  void managePump(uint32_t now);
+  void manageWater(uint32_t now);
 
 };
 #endif

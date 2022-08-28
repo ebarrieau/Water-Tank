@@ -13,7 +13,7 @@ WellModbusClient::WellModbusClient(Controller *tank,
 
 }
 
-int WellModbusClient::readDepth(long now) {
+int WellModbusClient::readDepth(uint32_t now) {
   if(!modbusTcpClient.requestFrom(unitId, HOLDING_REGISTERS, 101, 2)){
     // Serial.print("Read Depth Failed ");
     // Serial.println(modbusTcpClient.lastError());
@@ -34,13 +34,15 @@ int WellModbusClient::readDepth(long now) {
   return 1;
 }
 
-void WellModbusClient::poll(long now) {
+void WellModbusClient::poll(uint32_t now) {
   if (!modbusTcpClient.connected()) {
     // client not connected, start the Modbus TCP client
     modbusTcpClient.begin(ip, port);
+    lastPollTime = now;
   } else {
     // client connected
-    long nextMeasurementTime = addDate(lastPollTime, pollTime);
+    uint32_t nextMeasurementTime = addDate(lastPollTime, pollTime, false);
+
     if (isDateElapsed(now, nextMeasurementTime)) {
       if( readDepth(now) ){
         lastPollTime = now;

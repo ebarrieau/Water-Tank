@@ -40,7 +40,7 @@ void setup() {
 
 void loop() {
 
-  long now;
+  uint32_t now;
   char result = getDateTimeSeconds(now);
   if (result) {
     tank.setError(result);
@@ -49,5 +49,7 @@ void loop() {
   tank.update(now);
   wellClient.poll(now);
   modServer.poll();
+
+  delay(1000);
 
 }

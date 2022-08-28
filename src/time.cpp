@@ -5,7 +5,7 @@ char getDateTimeStruct(struct DateTime &dt) {
   return result;
 }
 
-char getDateTimeSeconds(long &time) {
+char getDateTimeSeconds(uint32_t &time) {
   struct DateTime now;
   char result = getDateTimeStruct(now);
   time = convertDateSeconds(now);
@@ -16,12 +16,28 @@ char getDateTimeSeconds(long &time) {
 //   Serial.println(String(dt.year) + ":" + String(dt.month) + ":" + String(dt.day));
 // }
 
-long convertDateSeconds(struct DateTime date) {
+uint32_t convertDateSeconds(struct DateTime date, bool absolute) {
   // returns seconds since Jan 01, 2000
-  // assumes all years are 365.25 days and all months are equal
-  long result = 0;
-  result += date.year * 1314900; //365.25 days per  year
-  result += date.month * 109575; //365.25 days per yer / 12 = 30.4375 days per month
+  uint32_t result = 0;
+
+  if (absolute) {
+    bool leapyear = date.year % 4;
+
+    if (date.year > 0) {
+      uint8_t yearSinceLeap = (date.year - 1) % 4;
+
+      result += (date.year - yearSinceLeap) * 31557600; //Add 365.25 days in seconds for every full set of leap years
+      result += yearSinceLeap * 3153600; //Add 365 days in seconds for ever year in incomplete set of lear years
+    }
+
+    for (int i=0; i<date.month; i++) {
+      int days = daysInMonth[i];
+      if (leapyear && i == 1) { //correct days in february on leap year
+        days = 29;
+      }
+      result += 86400 * days;
+    }
+  }
   result += date.day * 86400;  // 24 hours in a day
   result += date.hour * 3600;
   result += date.minute * 60;
@@ -29,23 +45,23 @@ long convertDateSeconds(struct DateTime date) {
   return result;
 }
 
-long addDate(long base, long add) {
+uint32_t addDate(uint32_t base, uint32_t add) {
   return base + add;
 }
 
-long addDate(long base, struct DateTime add) {
-  return addDate(base, convertDateSeconds(add));
+uint32_t addDate(uint32_t base, struct DateTime add, bool absolute) {
+  return addDate(base, convertDateSeconds(add, absolute));
 }
 
-long addDate(struct DateTime base, struct DateTime add) {
-  return addDate(convertDateSeconds(base), add);
+uint32_t addDate(struct DateTime base, struct DateTime add, bool absolute) {
+  return addDate(convertDateSeconds(base), add, absolute);
 }
 
-bool isDateElapsed(long current, long target) {
+bool isDateElapsed(uint32_t current, uint32_t target) {
   return current > target;
 }
 
-bool isDateElapsed(long current, struct DateTime target) {
+bool isDateElapsed(uint32_t current, struct DateTime target) {
   return isDateElapsed(current, convertDateSeconds(target));
 }
 
