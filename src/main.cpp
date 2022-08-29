@@ -24,32 +24,24 @@ void setup() {
   while (!Serial) {
     ; //wait for serial port to connect
   }
-  char rtcInit = Controllino_RTC_init();
-  if (!rtcInit) {
-    struct NetworkSettings networkSettings = {{0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
-                                              IPAddress(192,168,1,201)};
-    networkSetup(networkSettings);
-    tank.setup();
-    modServer.setup();
-  } else {
-    // Serial.println("RTC Failed to initialize.");
-    delayForever();
-  }
+
+  struct NetworkSettings networkSettings = {{0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
+                                            IPAddress(192,168,1,201)};
+  networkSetup(networkSettings);
+  tank.setup();
+  modServer.setup();
 
 }
 
 void loop() {
 
-  uint32_t now;
-  char result = getDateTimeSeconds(now);
-  if (result) {
-    tank.setError(result);
-  }
+  uint32_t now = millis();
+
   // Serial.println(now);
   tank.update(now);
   wellClient.poll(now);
   modServer.poll();
 
-  delay(1000);
+  // delay(1000);
 
 }

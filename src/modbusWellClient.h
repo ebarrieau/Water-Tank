@@ -23,7 +23,7 @@ private:
   uint8_t unitId;
   IPAddress ip;
   uint16_t port;
-  struct DateTime pollTime = {0,0,0,0,0,0,2}; // 2 seconds
+  uint32_t pollTime = 2 * MILLIS_IN_SECOND; // 2 seconds
   uint32_t lastPollTime = 0;
   EthernetClient ethClient;
   ModbusTCPClient modbusTcpClient;
