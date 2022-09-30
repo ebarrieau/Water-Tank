@@ -2,9 +2,11 @@
 
 Controller::Controller(unsigned int solenoidPin,
                        unsigned int pumpPin,
-                       unsigned int scalePin) : solenoidPin{solenoidPin},
+                       unsigned int scalePin,
+                       unsigned int wellPin) : solenoidPin{solenoidPin},
                                                 pumpPin{pumpPin},
-                                                scalePin{scalePin}
+                                                scalePin{scalePin},
+                                                wellPin{wellPin}
 {
 
 
@@ -17,15 +19,10 @@ void Controller::setup() {
 
   updateCurrentWeight();
   targetIncWeight = currentWeight + maxIncWeight;
-  struct DateTime currentTime;
-  struct DateTime startDelay = {0,0,0,0,0,10,0}; //30 seconds
-  char dateResult = getDateTime(currentTime);
-  if (!dateResult) {
-    nextOnTime = addDate(currentTime, startDelay);
-    pumpOffTime = currentTime;
-  } else {
-    error = dateResult;
-  }
+  uint32_t currentTime = millis();
+
+  tankOffTime = currentTime;
+  pumpOffTime = currentTime;
 
 }
 
@@ -34,125 +31,125 @@ void Controller::updateCurrentWeight() {
   currentWeight = convertWeight(loadCellRaw);
 }
 
-void Controller::turnWaterOn() {
+void Controller::turnWaterOn(uint32_t now) {
   if (!digitalRead(solenoidPin)) {
-    targetIncWeight = currentWeight + maxIncWeight;
-    struct DateTime now;
-    char result = getDateTime(now);
-    if (!result) {
-      nextOffTime = addDate(now, maxRunTime);
-    } else {
-      error = result;
-    }
+    targetIncWeight = currentWeight + currentIncWeightTarget;
+    tankOnTime = now;
   }
-  if (!error) {
-    digitalWrite(solenoidPin, HIGH);
-  } else {
-    turnWaterOff();
-  }
+
+  turnWellOn();
+  digitalWrite(solenoidPin, HIGH);
 }
 
-void Controller::turnWaterOff() {
+void Controller::turnWaterOff(uint32_t now) {
   if (digitalRead(solenoidPin)) {
-    struct DateTime now;
-    char result = getDateTime(now);
-    if (!result) {
-      nextOnTime = addDate(now, minRechargeTime);
-    } else {
-      error = result;
-    }
+    tankOffTime = now;
   }
   digitalWrite(solenoidPin, LOW);
 }
 
-void Controller::turnPumpOn() {
-  if (digitalRead(pumpPin) && !error) { //if pump is already on and no errors, do nothing
+void Controller::turnPumpOn(uint32_t now) {
+  if (digitalRead(pumpPin)) { //if pump is already on and no errors, do nothing
     return;
   }
 
-  if (!error) {
-    struct DateTime now;
-    char result = getDateTime(now);
-    if (!result) {
-      struct DateTime onDelay = addDate(pumpOffTime, pumpTimeout);
-      if (isDateElapsed(now, onDelay)) {
-        digitalWrite(pumpPin, HIGH);
-      }
-    } else {
-      error = result;
-      turnPumpOff();
-      return;
-    }
-
-  } else {
-    turnPumpOff();
+  if (isDateElapsed(now, pumpOffTime, pumpTimeout)) {
+    digitalWrite(pumpPin, HIGH);
   }
+
 }
 
-void Controller::turnPumpOff() {
+void Controller::turnPumpOff(uint32_t now) {
   if (!digitalRead(pumpPin)) { //if pump is alread off, do nothing
     return;
   } else { //if pump is on, set the pump off time for the timeout
-    char result = getDateTime(pumpOffTime);
-    if (!result) {
-      error = result;
-    }
+    pumpOffTime = now;
   }
   digitalWrite(pumpPin, LOW);
 }
 
-void Controller::manageWater() {
-  if (error) {
-    turnWaterOff();
+void Controller::turnWellOn() {
+  //well is on a NC contactor, so LOW is ON
+  if (!digitalRead(wellPin)) { //if well is already on, do nothing
     return;
   }
+  digitalWrite(pumpPin, LOW);
+}
+
+void Controller::turnWellOff() {
+  //well is on a NC contactor, so HIGH is OFF
+  if (digitalRead(wellPin)) { //if pump is alread off, do nothing
+    return;
+  }
+  digitalWrite(wellPin, HIGH);
+}
+
+void Controller::manageWater(uint32_t now) {
+
+  if (!runState) {
+    turnWaterOff(now);
+    return;
+  }
+
+  if (currentWeight >= maxWeight + hysteresis) {
+    turnWellOff();
+    turnWaterOff(now);
+    return;
+  }
+
   if (currentWeight >= maxWeight) {
-    turnWaterOff();
+    turnWaterOff(now);
     return;
   }
   if (digitalRead(solenoidPin) && currentWeight > targetIncWeight) {
-    turnWaterOff();
+    turnWaterOff(now);
     return;
   }
 
-  struct DateTime now;
-  char dateResult = getDateTime(now);
-  if (dateResult) {
-    error = dateResult;
+  if (currentWellDepth > 1000) {
+    turnWaterOff(now);
     return;
+  } else if (currentWellDepth > 2000) {
+    turnWellOff();
+    turnWaterOff(now);
   }
-  if (digitalRead(solenoidPin) && isDateElapsed(now, nextOffTime)) {
-    turnWaterOff();
+
+  if (digitalRead(solenoidPin) && isDateElapsed(now, tankOnTime, currentRunTime)) {
+    turnWaterOff(now);
     return;
   }
 
-  if (isDateElapsed(now, nextOnTime)) { //only turn on if min recharge time has elapsed
+  if (isDateElapsed(now, tankOffTime, minRechargeTime)) { //only turn on if min recharge time has elapsed
     if (currentWeight < (maxWeight - hysteresis)) { // only turn on if we are well below max volume this helps stop solenoid from short cycling
-      turnWaterOn();
+      if (!isDateElapsed(now, lastGoodWellTime, wellTimeout)) { //if the good until time has not elapsed, we trust the well depth and calculate a target weight
+        uint16_t availableWater = (1000 - currentWellDepth) * 1.5 * 8.33; //height between limit and current * gallons/foot * weight/gallon * 10 (fixed point 1 decimal)
+        currentIncWeightTarget = min(availableWater, maxIncWeight);
+
+      } else { //Otherwise we use a conservative default of 100.0 lbs
+        currentIncWeightTarget = 1000;
+      }
+      uint32_t expectedRunTime = currentIncWeightTarget / (5 * 8.33 * 10) * MILLIS_IN_MINUTE; // Expected milliseconds to run target lbs / ( flowrate gpm * lbs/gal)
+      currentRunTime = min(maxRunTime, expectedRunTime * 1.2);
+      turnWaterOn(now);
     }
   }
 
+
 }
 
- float Controller::getWeight() {
-  return currentWeight;
-}
+void Controller::managePump(uint32_t now) {
 
-void Controller::managePump() {
-  if (error) {
-    turnPumpOff();
-    return;
-  }
   if (currentWeight <= minPumpWeight) {
-    turnPumpOff();
+    turnPumpOff(now);
     return;
   } else if (currentWeight > (minPumpWeight + hysteresis)) {
-    turnPumpOn();
+    turnPumpOn(now);
+
   }
 }
 
-void Controller::update() {
+void Controller::update(uint32_t now) {
   updateCurrentWeight();
-  manageWater();
-  managePump();
+  manageWater(now);
+  managePump(now);
 }

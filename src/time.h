@@ -4,22 +4,11 @@
 #include "Arduino.h"
 #include "Controllino.h"
 
-struct DateTime {
-  unsigned char day;
-  unsigned char weekday;
-  unsigned char month;
-  unsigned char year;
-  unsigned char hour;
-  unsigned char minute;
-  unsigned char second;
-};
+#define MILLIS_IN_SECOND 1000
+#define MILLIS_IN_MINUTE 60000
+#define MILLIS_IN_HOUR 3600000
+#define MILLIS_IN_DAY 86400000
 
-const uint8_t daysInMonth []  = { 31,28,31,30,31,30,31,31,30,31,30,31 };
-
-char getDateTime(struct DateTime &dt);
-void printTime(struct DateTime dt);
-struct DateTime addDate(struct DateTime baseDate, struct DateTime addDate);
-bool isDateElapsed(struct DateTime current, struct DateTime target);
-long subtractTime(struct DateTime x, struct DateTime y);
+bool isDateElapsed(uint32_t current, uint32_t last, uint32_t target);
 
 #endif

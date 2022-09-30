@@ -9,56 +9,53 @@
 class Controller
 {
 public:
-  Controller(unsigned int solenoidPin, unsigned int pumpPin, unsigned int scalePin);
+  Controller(unsigned int solenoidPin, unsigned int pumpPin, unsigned int scalePin, unsigned int wellPin);
   void setup();
-  void update();
-  float getWeight();
-
+  void update(uint32_t now);
+  uint16_t getWeight() { return currentWeight; };
+  bool getPumpState() { return digitalRead(pumpPin); };
+  bool getSolenoidState() { return digitalRead(solenoidPin); };
+  uint16_t getTargetWeight() { return targetIncWeight; };
+  void setWellDepth(uint16_t depth) { currentWellDepth = depth;};
+  float getWellDepth() {return currentWellDepth; };
+  void setWellGoodTime(uint32_t time) { lastGoodWellTime = time; };
+  uint32_t getWellGoodTime() { return lastGoodWellTime; };
+  void setRunState(bool input) {runState = true;};
+  bool getRunState() {return runState;};
+  void setIncTarget(uint16_t input) { maxIncWeight = input;};
+  uint16_t getIncTarget() {return maxIncWeight;};
 private:
-  float currentWeight;
-  float maxWeight = 2500;
-  float maxIncWeight = 100;
-  float minPumpWeight = 500;
-  float targetIncWeight = 0;
-  char error = 0;
-  float hysteresis = 20;
-  struct DateTime minRechargeTime = {0,0,0,0,1,0,0}; // 1 hour
-  struct DateTime maxRunTime = {0,0,0,0,0,5,0}; // 5 minutes
-  struct DateTime nextOnTime;
-  struct DateTime nextOffTime;
-  struct DateTime pumpTimeout = {0,0,0,0,0,0,10};
-  struct DateTime pumpOffTime;
+  bool runState = true;
+  uint16_t currentWeight;
+  uint16_t currentWellDepth;
+  uint16_t maxWeight = 35000; //3,500.0 - first digit represents one decimal place
+  uint16_t maxIncWeight = 1500;
+  uint16_t currentIncWeightTarget;
+  uint16_t minPumpWeight = 5000;
+  uint16_t targetIncWeight = 0;
+  uint16_t hysteresis = 500;
+  uint32_t minRechargeTime = 1 * MILLIS_IN_HOUR; // 1 hour
+  uint32_t maxRunTime = 5 * MILLIS_IN_MINUTE; // 5 minutes
+  uint32_t currentRunTime = 5 * MILLIS_IN_MINUTE;
+  uint32_t tankOffTime;
+  uint32_t tankOnTime;
+  uint32_t pumpTimeout = 30 * MILLIS_IN_SECOND; // 30 seconds
+  uint32_t pumpOffTime;
+  uint32_t lastGoodWellTime;
+  uint32_t wellTimeout = 5 * MILLIS_IN_MINUTE;
   const unsigned int solenoidPin;
   const unsigned int pumpPin;
   const unsigned int scalePin;
+  const unsigned int wellPin;
   void updateCurrentWeight();
-  void turnWaterOn();
-  void turnWaterOff();
-  void turnPumpOn();
-  void turnPumpOff();
-  void managePump();
-  void manageWater();
+  void turnWaterOn(uint32_t now);
+  void turnWaterOff(uint32_t now);
+  void turnPumpOn(uint32_t now);
+  void turnPumpOff(uint32_t now);
+  void managePump(uint32_t now);
+  void manageWater(uint32_t now);
+  void turnWellOn();
+  void turnWellOff();
 
 };
 #endif
-
-
-// struct Tank {
-//   float currentWeight = 2500;
-//   float maxWeight = 2500;
-//   float incrementalWeight = 125;
-//   long recharge = 55;
-//   float targetWeight;
-//   unsigned int solenoidPin = CONTROLLINO_R2;
-//   unsigned int pumpPin = CONTROLLINO_R0;
-//   unsigned int scalePin = CONTROLLINO_AI12;
-//   DateTime lastOn;
-//   bool on = 0;
-// }tank;
-
-// struct Well {
-//   float currentGallons = 0;
-//   float minGallons = 300;
-//   unsigned int pumpPin = CONTROLLINO_R1;
-//   DateTime lastContact;
-// }well;
