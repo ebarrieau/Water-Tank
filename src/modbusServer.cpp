@@ -16,15 +16,18 @@ void TankModbusServer::setup() {
     delayForever();
   }
 
-  modbusTCPServer.configureCoils(0x00, 2);
-  modbusTCPServer.configureDiscreteInputs(0x00, 2);
-  modbusTCPServer.configureInputRegisters(0x00, 5);
-  modbusTCPServer.configureHoldingRegisters(0x00, 6);
+  modbusTCPServer.configureCoils(0x00, 1);
+  modbusTCPServer.configureDiscreteInputs(0x00, 3);
+  modbusTCPServer.configureInputRegisters(0x00, 6);
+  modbusTCPServer.configureHoldingRegisters(0x00, 1);
+  modbusTCPServer.coilWrite(0x00, tank->getRunState());
+  modbusTCPServer.holdingRegisterWrite(0x00, tank->getIncTarget());
 }
 
 void TankModbusServer::updateInputs() {
   modbusTCPServer.discreteInputWrite(0x00, tank->getPumpState());
   modbusTCPServer.discreteInputWrite(0x01, tank->getSolenoidState());
+  modbusTCPServer.discreteInputWrite(0x02, tank->getRunState());
   modbusTCPServer.inputRegisterWrite(0x00, tank->getWeight());
 
   // float depthFloat = tank->getWellDepth();
@@ -39,10 +42,25 @@ void TankModbusServer::updateInputs() {
   uint16_t highWord = tank->getWellGoodTime() & 0xFFFF;
   modbusTCPServer.inputRegisterWrite(0x03, highWord);
   modbusTCPServer.inputRegisterWrite(0x04, lowWord);
+
+  modbusTCPServer.inputRegisterWrite(0x05, tank->getIncTarget());
+}
+
+void TankModbusServer::updateSettings() {
+  int runState = modbusTCPServer.coilRead(0x00);
+  if (runState != -1) {
+    tank->setRunState(runState);
+  }
+
+  long incTarget = modbusTCPServer.holdingRegisterRead(0x00);
+  if (incTarget != -1) {
+    tank->setIncTarget((uint16_t)incTarget);
+  }
 }
 
 void TankModbusServer::poll() {
   updateInputs();
+  updateSettings();
 
   if (!client || !client.connected()) {
     client = ethServer.available();

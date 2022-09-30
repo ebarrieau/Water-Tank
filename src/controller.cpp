@@ -2,9 +2,11 @@
 
 Controller::Controller(unsigned int solenoidPin,
                        unsigned int pumpPin,
-                       unsigned int scalePin) : solenoidPin{solenoidPin},
+                       unsigned int scalePin,
+                       unsigned int wellPin) : solenoidPin{solenoidPin},
                                                 pumpPin{pumpPin},
-                                                scalePin{scalePin}
+                                                scalePin{scalePin},
+                                                wellPin{wellPin}
 {
 
 
@@ -35,6 +37,7 @@ void Controller::turnWaterOn(uint32_t now) {
     tankOnTime = now;
   }
 
+  turnWellOn();
   digitalWrite(solenoidPin, HIGH);
 }
 
@@ -65,7 +68,34 @@ void Controller::turnPumpOff(uint32_t now) {
   digitalWrite(pumpPin, LOW);
 }
 
+void Controller::turnWellOn() {
+  //well is on a NC contactor, so LOW is ON
+  if (!digitalRead(wellPin)) { //if well is already on, do nothing
+    return;
+  }
+  digitalWrite(pumpPin, LOW);
+}
+
+void Controller::turnWellOff() {
+  //well is on a NC contactor, so HIGH is OFF
+  if (digitalRead(wellPin)) { //if pump is alread off, do nothing
+    return;
+  }
+  digitalWrite(wellPin, HIGH);
+}
+
 void Controller::manageWater(uint32_t now) {
+
+  if (!runState) {
+    turnWaterOff(now);
+    return;
+  }
+
+  if (currentWeight >= maxWeight + hysteresis) {
+    turnWellOff();
+    turnWaterOff(now);
+    return;
+  }
 
   if (currentWeight >= maxWeight) {
     turnWaterOff(now);
@@ -79,9 +109,12 @@ void Controller::manageWater(uint32_t now) {
   if (currentWellDepth > 1000) {
     turnWaterOff(now);
     return;
+  } else if (currentWellDepth > 2000) {
+    turnWellOff();
+    turnWaterOff(now);
   }
 
-  if (digitalRead(solenoidPin) && isDateElapsed(now, tankOnTime, maxRunTime)) {
+  if (digitalRead(solenoidPin) && isDateElapsed(now, tankOnTime, currentRunTime)) {
     turnWaterOff(now);
     return;
   }
@@ -91,13 +124,16 @@ void Controller::manageWater(uint32_t now) {
       if (!isDateElapsed(now, lastGoodWellTime, wellTimeout)) { //if the good until time has not elapsed, we trust the well depth and calculate a target weight
         uint16_t availableWater = (1000 - currentWellDepth) * 1.5 * 8.33; //height between limit and current * gallons/foot * weight/gallon * 10 (fixed point 1 decimal)
         currentIncWeightTarget = min(availableWater, maxIncWeight);
+
       } else { //Otherwise we use a conservative default of 100.0 lbs
         currentIncWeightTarget = 1000;
       }
-
+      uint32_t expectedRunTime = currentIncWeightTarget / (5 * 8.33 * 10) * MILLIS_IN_MINUTE; // Expected milliseconds to run target lbs / ( flowrate gpm * lbs/gal)
+      currentRunTime = min(maxRunTime, expectedRunTime * 1.2);
       turnWaterOn(now);
     }
   }
+
 
 }
 

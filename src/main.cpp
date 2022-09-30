@@ -12,7 +12,7 @@
 #include "modbusServer.h"
 #include "modbusWellClient.h"
 
-Controller tank(CONTROLLINO_R2, CONTROLLINO_R0, CONTROLLINO_AI12);
+Controller tank(CONTROLLINO_R2, CONTROLLINO_R0, CONTROLLINO_AI12, CONTROLLINO_R1);
 
 WellModbusClient wellClient(&tank, 11, IPAddress(192,168,1,202), 502);
 TankModbusServer modServer(&tank, 502);

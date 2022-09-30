@@ -22,6 +22,7 @@ private:
   EthernetClient client;
   ModbusTCPServer modbusTCPServer;
   void updateInputs();
+  void updateSettings();
 
 };
 
