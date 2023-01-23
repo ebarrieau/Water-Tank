@@ -1,9 +1,9 @@
 #include "weight.h"
 
-float convertWeight(int val) {
-  return convertFourToTwenty(val, 0, 5000.0);
+uint16_t convertWeight(int val) {
+  return convertFourToTwenty(val, 0, 50000);
 }
 
-float convertFourToTwenty(int val, int lowCal, int highCal) {
-  return mapf(val, 205, 1023, lowCal, highCal);
+uint16_t convertFourToTwenty(int val, uint16_t lowCal, uint16_t highCal) {
+  return map(val, 205, 1023, lowCal, highCal);
 }
