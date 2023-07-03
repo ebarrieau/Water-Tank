@@ -5,7 +5,7 @@
 
 namespace DataStorage
 {
-  typedef struct WaterTankSettings 
+  struct WaterTankSettings 
   {
     uint16_t maxWeight = 35000;
     uint16_t maxIncWeight = 3000;
@@ -21,7 +21,7 @@ namespace DataStorage
     unsigned int wellPumpContactorPin;
   };
 
-  typedef struct WaterTankData
+  struct WaterTankData
   {
     uint16_t weight;
     uint16_t wellDepth;

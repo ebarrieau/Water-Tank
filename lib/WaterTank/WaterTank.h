@@ -10,14 +10,15 @@ namespace WaterTank
     bool tankIsFilling(DataStorage::WaterTankSettings &settings);
     bool tankIsOverfull(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     bool tankIsFull(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
+    bool tankExceedsFillingTarget(DataStorage::WaterTankData &data);
     bool tankIsNotFull(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     bool tankIsEmpty(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     bool tankIsNotEmpty(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     bool wellIsAtWorkingDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     bool wellIsAtSafetyDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     bool tankFillingTimeoutExceeded(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now);
-    bool wellRechargeComplete(DataStorage::WaterTankData &data, uint16_t &now);
-    bool wellDepthDataIsCurrent(DataStorage::WaterTankData &data, uint16_t &now);
+    bool wellRechargeComplete(DataStorage::WaterTankData &data, uint16_t now);
+    bool wellDepthDataIsCurrent(DataStorage::WaterTankData &data, uint16_t now);
     bool housePumpIsRunning(DataStorage::WaterTankSettings &settings);
     bool wellPumpIsRunning(DataStorage::WaterTankSettings &settings);
     uint16_t calculateWeightTarget(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);

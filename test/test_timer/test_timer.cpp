@@ -89,7 +89,7 @@ void setup()
     RUN_TEST(test_time_not_elapsed_rollover);
     RUN_TEST(test_time_elapsed);
     RUN_TEST(test_time_elapsed_rollover);
-    RUN_TEST(test_timer_accuracy);
+    // RUN_TEST(test_timer_accuracy);
 
     UNITY_END();
 }

@@ -15,6 +15,11 @@ bool WaterTank::tankIsFull(DataStorage::WaterTankSettings &settings, DataStorage
     return (data.weight >= settings.maxWeight);
 }
 
+bool WaterTank::tankExceedsFillingTarget(DataStorage::WaterTankData &data)
+{
+    return (data.weight >= data.fillingWeightTarget);
+}
+
 bool WaterTank::tankIsNotFull(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
 {
     return (data.weight < (settings.maxWeight - settings.maxIncWeight));
@@ -30,42 +35,42 @@ bool WaterTank::tankIsNotEmpty(DataStorage::WaterTankSettings &settings, DataSto
     return (data.weight > (settings.tankMinHousePumpWeight + settings.hysteresis));
 }
 
- bool wellIsAtWorkingDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
- {
+bool WaterTank::wellIsAtWorkingDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
+{
     return (data.wellDepth >= settings.wellWorkingDepth);
- }
+}
 
-  bool wellIsAtSafetyDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
- {
+bool WaterTank::wellIsAtSafetyDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
+{
     return (data.wellDepth >= settings.wellSafetyDepth);
- }
+}
 
-bool tankFillingTimeoutExceeded(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now)
+bool WaterTank::tankFillingTimeoutExceeded(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now)
 {
     return (WaterTank::tankIsFilling(settings) && SimpleTimer::Ended(now, data.fillingTimeTarget));
 }
 
-bool wellRechargeComplete(DataStorage::WaterTankData &data, uint16_t now)
+bool WaterTank::wellRechargeComplete(DataStorage::WaterTankData &data, uint16_t now)
 {
     return SimpleTimer::Ended(now, data.rechargeTimeTarget);
 }
 
-bool wellDepthDataIsCurrent(DataStorage::WaterTankData &data, uint16_t now)
+bool WaterTank::wellDepthDataIsCurrent(DataStorage::WaterTankData &data, uint16_t now)
 {
     return !SimpleTimer::Ended(now, data.wellDataGoodUntil);
 }
 
-bool housePumpIsRunning(DataStorage::WaterTankSettings &settings)
+bool WaterTank::housePumpIsRunning(DataStorage::WaterTankSettings &settings)
 {
     return digitalRead(settings.housePumpContactorPin);
 }
 
-bool wellPumpIsRunning(DataStorage::WaterTankSettings &settings)
+bool WaterTank::wellPumpIsRunning(DataStorage::WaterTankSettings &settings)
 {
-    return digitalRead(settings.wellPumpContactorPin);
+    return !digitalRead(settings.wellPumpContactorPin);
 }
 
-uint16_t calculateWeightTarget(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
+uint16_t WaterTank::calculateWeightTarget(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
 {
     uint16_t spaceInTank = settings.maxWeight - data.weight;
     uint16_t availableInWell = (settings.wellWorkingDepth - data.wellDepth) * 1.4687965402597 * 8.34; //depth in feet * gallons per foot * pounds per gallon
@@ -79,11 +84,10 @@ uint8_t WaterTank::stopTankIfNeeded(DataStorage::WaterTankSettings &settings, Da
 {
     uint8_t results = 0;
     
-    results |= WaterTank::tankIsOverfull(settings, data);
-    results |= WaterTank::tankIsFull(settings, data) << 1;
-    results |= WaterTank::wellIsAtWorkingDepth(settings, data) << 2;
-    results |= WaterTank::wellIsAtSafetyDepth(settings, data) << 3;
-    results |= WaterTank::tankFillingTimeoutExceeded(settings, data, now) << 4;
+    results |= WaterTank::tankIsFull(settings, data);
+    results |= WaterTank::wellIsAtWorkingDepth(settings, data) << 1;
+    results |= WaterTank::tankFillingTimeoutExceeded(settings, data, now) << 2;
+    results |= WaterTank::tankExceedsFillingTarget(data) << 3;
     
 
     if (results != 0 && WaterTank::tankIsFilling(settings))
@@ -104,7 +108,6 @@ uint8_t WaterTank::startTankIfNeeded(DataStorage::WaterTankSettings &settings, D
     results |= WaterTank::wellIsAtWorkingDepth(settings, data) << 2;
     results |= WaterTank::wellRechargeComplete(data, now) << 3;
     results |= WaterTank::wellDepthDataIsCurrent(data, now) << 4;
-
 
     if (results == 0b00011010)
     {
