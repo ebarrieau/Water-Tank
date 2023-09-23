@@ -39,7 +39,7 @@ void setup()
 
   SimpleTimer::Setup(&currentSeconds);
   WellClient::setup(settings);
-  int serverSetupStatus = TankServer::setup(502, settings);
+  int serverSetupStatus = ModbusTankServer::setup(502, settings);
 
   if (!networkSetupStatus || !serverSetupStatus) {
     while(1) {
@@ -60,7 +60,7 @@ void loop()
   WaterTank::manageHousePump(settings, data);
   WaterTank::manageWellPump(settings, data, currentSeconds);
 
-  TankServer::poll(settings, data, currentSeconds);
+  ModbusTankServer::poll(settings, data, currentSeconds);
 
 }
 

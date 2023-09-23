@@ -7,7 +7,7 @@
 #include "ArduinoModbus.h"
 #include "DataStorage.h"
 
-namespace TankServer
+namespace ModbusTankServer
 {
     int setup(uint16_t port, DataStorage::WaterTankSettings &settings);
     void poll(ModbusTCPServer &server, DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);

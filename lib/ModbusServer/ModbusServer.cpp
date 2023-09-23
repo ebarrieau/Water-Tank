@@ -1,6 +1,6 @@
 #include "ModbusServer.h"
 
-int TankServer::setup(uint16_t port, DataStorage::WaterTankSettings &settings) {
+int ModbusTankServer::setup(uint16_t port, DataStorage::WaterTankSettings &settings) {
     // start the server
     EthernetServer ethServer(port);
     ethServer.begin();
@@ -21,7 +21,7 @@ int TankServer::setup(uint16_t port, DataStorage::WaterTankSettings &settings) {
     return 1;
 }
 
-void TankServer::updateInputs(ModbusTCPServer &server, DataStorage::WaterTankData &data)
+void ModbusTankServer::updateInputs(ModbusTCPServer &server, DataStorage::WaterTankData &data)
 {
   server.inputRegisterWrite(0x00, data.weight);
   server.inputRegisterWrite(0x01, data.wellDepth);
@@ -33,9 +33,9 @@ void TankServer::updateInputs(ModbusTCPServer &server, DataStorage::WaterTankDat
 
 }
 
-void TankServer::poll(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
+void ModbusTankServer::poll(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
 {
-  TankServer::updateInputs(settings.server, data);
+  ModbusTankServer::updateInputs(settings.server, data);
 
   if (!settings.ethClient || !settings.ethClient.connected()) {
     settings.ethClient = settings.ethServer.available();
