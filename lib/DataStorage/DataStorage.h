@@ -9,26 +9,26 @@ namespace DataStorage
 {
   struct WaterTankSettings 
   {
-    uint16_t maxWeight = 35000;
-    uint16_t maxIncWeight = 3000;
-    uint16_t hysteresis = 500;
-    uint16_t wellWorkingDepth = 1500;
-    uint16_t wellSafetyDepth = 2000;
-    uint16_t wellRechargeMinTime = 3600;
-    uint16_t wellRechargeCompleteDepth = 750;
-    uint16_t tankMinHousePumpWeight = 5000;
+    uint16_t maxWeight;
+    uint16_t maxIncWeight;
+    uint16_t hysteresis;
+    uint16_t wellWorkingDepth;
+    uint16_t wellSafetyDepth;
+    uint16_t wellRechargeMinTime;
+    uint16_t wellRechargeCompleteDepth;
+    uint16_t tankMinHousePumpWeight;
     unsigned int tankFillSolenoidPin;
     unsigned int housePumpContactorPin;
     unsigned int tankScaleAnalogPin;
     unsigned int wellPumpContactorPin;
-    IPAddress wellIP;
-    ModbusTCPClient wellClient;
-    uint16_t port = 502;
-    uint16_t wellPollTimeSetpoint = 1;
-    uint16_t wellDataGoodUntilSetpoint = 600;
-    EthernetServer ethServer;
-    EthernetClient ethClient;
-    ModbusTCPServer server;
+    IPAddress* wellIP;
+    ModbusTCPClient* wellClient;
+    uint16_t port;
+    uint16_t wellPollTimeSetpoint;
+    uint16_t wellDataGoodUntilSetpoint;
+    EthernetServer* ethServer;
+    EthernetClient* ethClient;
+    ModbusTCPServer* server;
 
     
   };

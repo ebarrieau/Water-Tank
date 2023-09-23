@@ -1,5 +1,5 @@
-#ifndef MODBUS_SERVER_H
-#define MODBUS_SERVER_H
+#ifndef TANK_MODBUS_SERVER_H
+#define TANK_MODBUS_SERVER_H
 
 #include "Arduino.h"
 #include "Ethernet.h"
@@ -10,7 +10,7 @@
 namespace ModbusTankServer
 {
     int setup(uint16_t port, DataStorage::WaterTankSettings &settings);
-    void poll(ModbusTCPServer &server, DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
+    void poll(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     void updateInputs(ModbusTCPServer &server, DataStorage::WaterTankData &data);
 }
 

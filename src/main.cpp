@@ -5,24 +5,41 @@
 //Third Party Libraries
 #include "Controllino.h"
 
-//Private Includes
+//Private 
+#include <TankModbusServer.h>
 #include <SimpleTimer.h>
 #include <DataStorage.h>
 #include <WaterTank.h>
 #include <modbusWellClient.h>
-#include <ModbusServer.h>
 #include <network.h>
 
 volatile int16_t currentSeconds = 0;
 
-DataStorage::WaterTankData data;
-DataStorage::WaterTankSettings settings;
+IPAddress* wellIP = new IPAddress(192,168,1,202);
 
-settings.tankFillSolenoidPin = CONTROLLINO_R2;
-settings.wellPumpContactor = CONTROLLINO_R0;
-settings.tankScaleAnalogPin =  CONTROLLINO_AI12
-settings.wellPumpContactorPin = CONTROLLINO_R1;
-settings.wellIP = IPAddress(192,168,1,202);
+DataStorage::WaterTankData data = {0,0,0,0,0,0,0};
+DataStorage::WaterTankSettings settings = {
+  35000, //maxWeight
+  3000, //maxIncWeight
+  500, //hysteresis
+  1500, //wellWorkingDepth
+  2000, //wellSafetyDepth
+  3600, //wellRechargeMinTime
+  750, //wellRechargeCompleteDepth
+  5000, //tankMinHousePumpWeight
+  CONTROLLINO_R2, //tankFillSolenoidPin
+  CONTROLLINO_R0, //housePumpContactorPin
+  CONTROLLINO_AI12, //tankScaleAnalogPin
+  CONTROLLINO_R1, //wellPumpContactorPin
+  wellIP, //wellIP
+  0, //wellClient
+  502, //well Port
+  1, //wellPollTimeSetpoint
+  600, //wellDataGoodUntilSetpoint
+  0, //ethServer
+  0, //ethClient
+  0 //server
+};
 
 void setup()
 {
@@ -60,7 +77,7 @@ void loop()
   WaterTank::manageHousePump(settings, data);
   WaterTank::manageWellPump(settings, data, currentSeconds);
 
-  ModbusTankServer::poll(settings, data, currentSeconds);
+  ModbusTankServer::poll(settings, data);
 
 }
 

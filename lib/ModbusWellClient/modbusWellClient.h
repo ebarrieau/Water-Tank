@@ -12,7 +12,7 @@ namespace WellClient
 {
     void setup(DataStorage::WaterTankSettings &settings);
     int poll(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now);
-    int readDepth(DataStorage::WaterTankData &data);
+    int readDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
 }
 
 #endif

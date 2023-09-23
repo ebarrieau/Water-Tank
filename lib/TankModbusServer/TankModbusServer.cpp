@@ -1,23 +1,20 @@
-#include "ModbusServer.h"
+#include "TankModbusServer.h"
 
 int ModbusTankServer::setup(uint16_t port, DataStorage::WaterTankSettings &settings) {
     // start the server
-    EthernetServer ethServer(port);
-    ethServer.begin();
+    settings.ethServer = new EthernetServer(port);
+    settings.ethServer->begin();
 
-    settings.ethServer = ethServer;
-
-    ModbusTCPServer server;
+    settings.server = new ModbusTCPServer;
 
     // start the Modbus TCP server
-    if (!server.begin()) {
+    if (!settings.server->begin()) {
         // Serial.println("Failed to start Modbus TCP Server!");
         return 0;
     }
 
-    server.configureInputRegisters(0x00, 6);
+    settings.server->configureInputRegisters(0x00, 6);
 
-    settings.server = server;
     return 1;
 }
 
@@ -35,16 +32,22 @@ void ModbusTankServer::updateInputs(ModbusTCPServer &server, DataStorage::WaterT
 
 void ModbusTankServer::poll(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
 {
-  ModbusTankServer::updateInputs(settings.server, data);
+  ModbusTankServer::updateInputs(*settings.server, data);
 
-  if (!settings.ethClient || !settings.ethClient.connected()) {
-    settings.ethClient = settings.ethServer.available();
-    if (settings.ethClient) {
-      settings.server.accept(settings.ethClient);
+  if (!settings.ethClient || !settings.ethClient->connected()) {
+    if (settings.ethClient)
+    {
+      delete settings.ethClient;
+    }
+    EthernetClient client = settings.ethServer->available();
+    if (client) {
+      settings.ethClient = new EthernetClient();
+      memcpy(settings.ethClient, &client, sizeof(client));
+      settings.server->accept(*settings.ethClient);
     }
   }
 
-  if (settings.ethClient.connected()) {
-    settings.server.poll();
+  if (settings.ethClient->connected()) {
+    settings.server->poll();
   }
 }
