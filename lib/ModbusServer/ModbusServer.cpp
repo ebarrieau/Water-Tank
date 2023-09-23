@@ -1,4 +1,4 @@
-#include "modbusServer.h"
+#include "ModbusServer.h"
 
 int TankServer::setup(uint16_t port, DataStorage::WaterTankSettings &settings) {
     // start the server
@@ -23,6 +23,7 @@ int TankServer::setup(uint16_t port, DataStorage::WaterTankSettings &settings) {
 
 void TankServer::updateInputs(ModbusTCPServer &server, DataStorage::WaterTankData &data)
 {
+  server.inputRegisterWrite(0x00, data.weight);
   server.inputRegisterWrite(0x01, data.wellDepth);
   server.inputRegisterWrite(0x02, data.fillingWeightTarget);
   uint16_t lowWord = data.wellDataGoodUntil >> 16;

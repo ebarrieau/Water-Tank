@@ -3,19 +3,26 @@
 #include "Arduino.h"
 
 //Third Party Libraries
-
+#include "Controllino.h"
 
 //Private Includes
-#include "SimpleTimer.h"
-#include "DataStorage.h"
-#include "WaterTank.h"
-#include "modbusWellClient.h"
-#include "ModbusServer.h"
+#include <SimpleTimer.h>
+#include <DataStorage.h>
+#include <WaterTank.h>
+#include <modbusWellClient.h>
+#include <ModbusServer.h>
+#include <network.h>
 
 volatile int16_t currentSeconds = 0;
 
 DataStorage::WaterTankData data;
 DataStorage::WaterTankSettings settings;
+
+settings.tankFillSolenoidPin = CONTROLLINO_R2;
+settings.wellPumpContactor = CONTROLLINO_R0;
+settings.tankScaleAnalogPin =  CONTROLLINO_AI12
+settings.wellPumpContactorPin = CONTROLLINO_R1;
+settings.wellIP = IPAddress(192,168,1,202);
 
 void setup()
 {
@@ -25,9 +32,20 @@ void setup()
     ; //wait for serial port to connect
   }
 
+  struct NetworkSettings networkSettings = {{0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
+                                            IPAddress(192,168,1,201),
+                                            CONTROLLINO_ETHERNET_CHIP_SELECT};
+  int networkSetupStatus = networkSetup(networkSettings);
+
   SimpleTimer::Setup(&currentSeconds);
   WellClient::setup(settings);
-  TankServer::setup(settings);
+  int serverSetupStatus = TankServer::setup(502, settings);
+
+  if (!networkSetupStatus || !serverSetupStatus) {
+    while(1) {
+      // Delay forever, fatal setup error
+    }
+  }
 
 }
 
