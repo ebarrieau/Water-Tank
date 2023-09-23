@@ -2,6 +2,7 @@
 #define DATA_STORAGE_H
 
 #include <Arduino.h>
+#include <Ethernet.h>
 
 namespace DataStorage
 {
@@ -19,6 +20,10 @@ namespace DataStorage
     unsigned int housePumpContactorPin;
     unsigned int tankScaleAnalogPin;
     unsigned int wellPumpContactorPin;
+    IPAddress wellIP;
+    uint16_t port = 502;
+    uint16_t wellPollTimeSetpoint = 1;
+    uint16_t wellDataGoodUntilSetpoint = 600;
   };
 
   struct WaterTankData
@@ -29,6 +34,7 @@ namespace DataStorage
     int16_t fillingTimeTarget;
     int16_t rechargeTimeTarget;
     int16_t wellDataGoodUntil;
+    int16_t wellPollTimeTarget;
   };
 }
 
