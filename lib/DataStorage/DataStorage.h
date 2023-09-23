@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Ethernet.h>
+#include <ArduinoModbus.h>
 
 namespace DataStorage
 {
@@ -21,9 +22,15 @@ namespace DataStorage
     unsigned int tankScaleAnalogPin;
     unsigned int wellPumpContactorPin;
     IPAddress wellIP;
+    ModbusTCPClient wellClient;
     uint16_t port = 502;
     uint16_t wellPollTimeSetpoint = 1;
     uint16_t wellDataGoodUntilSetpoint = 600;
+    EthernetServer ethServer;
+    EthernetClient ethClient;
+    ModbusTCPServer server;
+
+    
   };
 
   struct WaterTankData

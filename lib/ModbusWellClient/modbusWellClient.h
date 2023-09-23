@@ -8,11 +8,11 @@
 #include "DataStorage.h"
 #include "SimpleTimer.h"
 
-namespace WaterTank
+namespace WellClient
 {
-    ModbusTCPClient setup();
-    int poll(ModbusTCPClient &client, DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now);
-    int readDepth(ModbusTCPClient &client, DataStorage::WaterTankData &data);
+    void setup(DataStorage::WaterTankSettings &settings);
+    int poll(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now);
+    int readDepth(DataStorage::WaterTankData &data);
 }
 
 #endif

@@ -1,13 +1,13 @@
 #include "ModbusWellClient.h"
 
-ModbusTCPClient WaterTank::setup()
+void WellClient::setup(DataStorage::WaterTankSettings &settings)
 {
     EthernetClient ethClient;
     ModbusTCPClient modbusClient(ethClient);
-    return modbusClient;
+    settings.wellClient = modbusClient;
 }
 
-int WaterTank::poll(ModbusTCPClient &client, DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now)
+int WellClient::poll(ModbusTCPClient &client, DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now)
 {
     if (!client.connected()) {
     // client not connected, start the Modbus TCP client
@@ -16,7 +16,7 @@ int WaterTank::poll(ModbusTCPClient &client, DataStorage::WaterTankSettings &set
     } else {
     // client connected
         if (SimpleTimer::Ended(now, data.wellPollTimeTarget)) {
-            if(WaterTank::readDepth(client, data)){
+            if(WellClient::readDepth(client, data)){
                 data.wellPollTimeTarget = SimpleTimer::Start(now, settings.wellPollTimeSetpoint);
                 data.wellDataGoodUntil = SimpleTimer::Start(now, settings.wellDataGoodUntilSetpoint);
                 return 1;
@@ -28,7 +28,7 @@ int WaterTank::poll(ModbusTCPClient &client, DataStorage::WaterTankSettings &set
     return 0;
 }
 
-int WaterTank::readDepth(ModbusTCPClient &client, DataStorage::WaterTankData &data)
+int WellClient::readDepth(ModbusTCPClient &client, DataStorage::WaterTankData &data)
 {
     if(!client.requestFrom(11, HOLDING_REGISTERS, 101, 2)){
         return 0;
