@@ -23,10 +23,7 @@ void ModbusTankServer::updateInputs(ModbusTCPServer &server, DataStorage::WaterT
   server.inputRegisterWrite(0x00, data.weight);
   server.inputRegisterWrite(0x01, data.wellDepth);
   server.inputRegisterWrite(0x02, data.fillingWeightTarget);
-  uint16_t lowWord = data.wellDataGoodUntil >> 16;
-  uint16_t highWord = data.wellDataGoodUntil & 0xFFFF;
-  server.inputRegisterWrite(0x03, highWord);
-  server.inputRegisterWrite(0x04, lowWord);
+  server.inputRegisterWrite(0x03, data.wellDataGoodUntil);
 
 }
 

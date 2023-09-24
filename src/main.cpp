@@ -1,6 +1,7 @@
 //Standard libraries
 
 #include "Arduino.h"
+#include "Ethernet.h"
 
 //Third Party Libraries
 #include "Controllino.h"
@@ -22,9 +23,9 @@ DataStorage::WaterTankSettings settings = {
   35000, //maxWeight
   3000, //maxIncWeight
   500, //hysteresis
-  1500, //wellWorkingDepth
+  1750, //wellWorkingDepth
   2000, //wellSafetyDepth
-  3600, //wellRechargeMinTime
+  1800, //wellRechargeMinTime
   750, //wellRechargeCompleteDepth
   5000, //tankMinHousePumpWeight
   CONTROLLINO_R2, //tankFillSolenoidPin

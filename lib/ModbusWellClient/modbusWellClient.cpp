@@ -14,6 +14,7 @@ int WellClient::poll(DataStorage::WaterTankSettings &settings, DataStorage::Wate
     } else {
     // client connected
         if (SimpleTimer::Ended(now, data.wellPollTimeTarget)) {
+            //returns 1 if successful and 0 if unsuccessfull, stop client if request fails
             if(WellClient::readDepth(settings, data)){
                 data.wellPollTimeTarget = SimpleTimer::Start(now, settings.wellPollTimeSetpoint);
                 data.wellDataGoodUntil = SimpleTimer::Start(now, settings.wellDataGoodUntilSetpoint);
@@ -28,13 +29,22 @@ int WellClient::poll(DataStorage::WaterTankSettings &settings, DataStorage::Wate
 
 int WellClient::readDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
 {
+    //Clear the receive buffer incase there is any random data in there
+    while(settings.wellClient->available())
+    {
+        settings.wellClient->read();
+    }
+
+    //Read two registers starting at address 101. Returns falsy if unsuccessful
     if(!settings.wellClient->requestFrom(11, HOLDING_REGISTERS, 101, 2)){
         return 0;
     }
-    uint16_t buffer[2];
-    unsigned int i = 0;
-    while (settings.wellClient->available()){
-        buffer[i++] = settings.wellClient->read();
+
+    uint8_t len = 2;
+    uint16_t buffer[len];
+    for (int i=0; i<len; i++)
+    {
+        buffer[i] = settings.wellClient->read();
     }
     uint32_t depthInt = (uint32_t) buffer[1] << 16 | buffer[0];
     float depthFloat;
