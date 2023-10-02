@@ -70,6 +70,13 @@ bool WaterTank::wellPumpIsRunning(DataStorage::WaterTankSettings &settings)
     return !digitalRead(settings.wellPumpContactorPin);
 }
 
+void WaterTank::updateWeight(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
+{
+  int loadCellRaw = analogRead(settings.tankScaleAnalogPin);
+  //500ohm Resistor 24V supply - 4-20mA = 2-10V = 204.8-1023 steps
+  data.weight = map(loadCellRaw, 205, 1023, 0, 50000);
+}
+
 uint16_t WaterTank::calculateWeightTarget(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
 {
     uint16_t spaceInTank = settings.maxWeight - data.weight;
@@ -88,7 +95,7 @@ uint8_t WaterTank::stopTankIfNeeded(DataStorage::WaterTankSettings &settings, Da
     results |= WaterTank::wellIsAtWorkingDepth(settings, data) << 1;
     results |= WaterTank::tankFillingTimeoutExceeded(settings, data, now) << 2;
     results |= WaterTank::tankExceedsFillingTarget(data) << 3;
-    
+
 
     if (results != 0 && WaterTank::tankIsFilling(settings))
     {
@@ -113,8 +120,9 @@ uint8_t WaterTank::startTankIfNeeded(DataStorage::WaterTankSettings &settings, D
     {
         uint16_t currentIncWeightTarget = WaterTank::calculateWeightTarget(settings, data);
         data.fillingWeightTarget = data.weight + currentIncWeightTarget;
-        uint16_t expectedFillTimeSeconds = (currentIncWeightTarget / 10) / (5 / 60 * 8.34); // target lbs / ( flowrate gpm * lbs/gal)
+        uint16_t expectedFillTimeSeconds = currentIncWeightTarget / 6.95; // target lbs / ( 5 gal/min / 60s/min * lbs/gal * 10 Fixed point offset)
         data.fillingTimeTarget = SimpleTimer::Start(now, expectedFillTimeSeconds * 1.2);
+        
         digitalWrite(settings.tankFillSolenoidPin, HIGH);
         return 1;
     }

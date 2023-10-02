@@ -1,15 +1,15 @@
 #include "ModbusWellClient.h"
 
-void WellClient::setup(DataStorage::WaterTankSettings &settings)
+ModbusTCPClient WellClient::setup()
 {
-    settings.wellClient = new ModbusTCPClient(* new EthernetClient);
+    return ModbusTCPClient(* new EthernetClient);
 }
 
 int WellClient::poll(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now)
 {
-    if (!settings.wellClient->connected()) {
+    if (!settings.wellClient.connected()) {
     // client not connected, start the Modbus TCP client
-        settings.wellClient->begin(*settings.wellIP, settings.port);
+        settings.wellClient.begin(settings.wellIP, settings.port);
         data.wellPollTimeTarget = now;
     } else {
     // client connected
@@ -20,7 +20,7 @@ int WellClient::poll(DataStorage::WaterTankSettings &settings, DataStorage::Wate
                 data.wellDataGoodUntil = SimpleTimer::Start(now, settings.wellDataGoodUntilSetpoint);
                 return 1;
             } else {
-                settings.wellClient->stop();
+                settings.wellClient.stop();
             }
         }
     }
@@ -30,13 +30,13 @@ int WellClient::poll(DataStorage::WaterTankSettings &settings, DataStorage::Wate
 int WellClient::readDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
 {
     //Clear the receive buffer incase there is any random data in there
-    while(settings.wellClient->available())
+    while(settings.wellClient.available())
     {
-        settings.wellClient->read();
+        settings.wellClient.read();
     }
 
     //Read two registers starting at address 101. Returns falsy if unsuccessful
-    if(!settings.wellClient->requestFrom(11, HOLDING_REGISTERS, 101, 2)){
+    if(!settings.wellClient.requestFrom(11, HOLDING_REGISTERS, 101, 2)){
         return 0;
     }
 
@@ -44,7 +44,7 @@ int WellClient::readDepth(DataStorage::WaterTankSettings &settings, DataStorage:
     uint16_t buffer[len];
     for (int i=0; i<len; i++)
     {
-        buffer[i] = settings.wellClient->read();
+        buffer[i] = settings.wellClient.read();
     }
     uint32_t depthInt = (uint32_t) buffer[1] << 16 | buffer[0];
     float depthFloat;

@@ -5,6 +5,7 @@
 
 //Third Party Libraries
 #include "Controllino.h"
+#include "MemoryUsage.h"
 
 //Private 
 #include <TankModbusServer.h>
@@ -14,13 +15,14 @@
 #include <modbusWellClient.h>
 #include <network.h>
 
+
 volatile int16_t currentSeconds = 0;
 
-IPAddress* wellIP = new IPAddress(192,168,1,202);
+// IPAddress* wellIP = new IPAddress(192,168,1,202);
 
 DataStorage::WaterTankData data = {0,0,0,0,0,0,0};
 DataStorage::WaterTankSettings settings = {
-  35000, //maxWeight
+  40000, //maxWeight
   3000, //maxIncWeight
   500, //hysteresis
   1750, //wellWorkingDepth
@@ -32,14 +34,14 @@ DataStorage::WaterTankSettings settings = {
   CONTROLLINO_R0, //housePumpContactorPin
   CONTROLLINO_AI12, //tankScaleAnalogPin
   CONTROLLINO_R1, //wellPumpContactorPin
-  wellIP, //wellIP
-  0, //wellClient
+  IPAddress(192,168,1,202), //wellIP
+  WellClient::setup(), //wellClient
   502, //well Port
   1, //wellPollTimeSetpoint
   600, //wellDataGoodUntilSetpoint
-  0, //ethServer
-  0, //ethClient
-  0 //server
+  EthernetServer(502), //ethServer
+  EthernetClient(), //ethClient
+  ModbusTCPServer() //server
 };
 
 void setup()
@@ -50,13 +52,16 @@ void setup()
     ; //wait for serial port to connect
   }
 
+  pinMode(settings.tankFillSolenoidPin, OUTPUT);
+  pinMode(settings.housePumpContactorPin, OUTPUT);
+  pinMode(settings.wellPumpContactorPin, OUTPUT);
+
   struct NetworkSettings networkSettings = {{0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
                                             IPAddress(192,168,1,201),
                                             CONTROLLINO_ETHERNET_CHIP_SELECT};
   int networkSetupStatus = networkSetup(networkSettings);
 
   SimpleTimer::Setup(&currentSeconds);
-  WellClient::setup(settings);
   int serverSetupStatus = ModbusTankServer::setup(502, settings);
 
   if (!networkSetupStatus || !serverSetupStatus) {
@@ -64,14 +69,16 @@ void setup()
       // Delay forever, fatal setup error
     }
   }
-
 }
 
 
 void loop()
 {
+  // FREERAM_PRINT;
 
   WellClient::poll(settings, data, currentSeconds);
+
+  WaterTank::updateWeight(settings, data);
 
   WaterTank::stopTankIfNeeded(settings, data, currentSeconds);
   WaterTank::startTankIfNeeded(settings, data, currentSeconds);

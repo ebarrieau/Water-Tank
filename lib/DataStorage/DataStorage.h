@@ -21,14 +21,14 @@ namespace DataStorage
     unsigned int housePumpContactorPin;
     unsigned int tankScaleAnalogPin;
     unsigned int wellPumpContactorPin;
-    IPAddress* wellIP;
-    ModbusTCPClient* wellClient;
+    IPAddress wellIP;
+    ModbusTCPClient wellClient;
     uint16_t port;
     uint16_t wellPollTimeSetpoint;
     uint16_t wellDataGoodUntilSetpoint;
-    EthernetServer* ethServer;
-    EthernetClient* ethClient;
-    ModbusTCPServer* server;
+    EthernetServer ethServer;
+    EthernetClient ethClient;
+    ModbusTCPServer server;
 
     
   };

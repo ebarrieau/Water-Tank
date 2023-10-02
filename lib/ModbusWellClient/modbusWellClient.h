@@ -10,7 +10,7 @@
 
 namespace WellClient
 {
-    void setup(DataStorage::WaterTankSettings &settings);
+    ModbusTCPClient setup();
     int poll(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now);
     int readDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
 }

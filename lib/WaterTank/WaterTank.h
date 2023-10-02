@@ -24,6 +24,7 @@ namespace WaterTank
     uint16_t calculateWeightTarget(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     uint8_t stopTankIfNeeded(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now);
     uint8_t startTankIfNeeded(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now);
+    void updateWeight(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     uint8_t manageHousePump(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data);
     uint8_t manageWellPump(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now);
 
