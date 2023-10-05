@@ -4,13 +4,12 @@
 #include "Arduino.h"
 #include "Ethernet.h"
 #include "SPI.h"
-#include "Controllino.h"
-#include "helper.h"
 
 struct NetworkSettings {uint8_t mac[6];
                         IPAddress ip;
+                        uint8_t chipSelectPin;
                       };
 
-void networkSetup(struct NetworkSettings networkSettings);
+int networkSetup(struct NetworkSettings networkSettings);
 
 #endif
