@@ -15,6 +15,7 @@ namespace DataStorage
     uint16_t wellWorkingDepth;
     uint16_t wellSafetyDepth;
     uint16_t wellRechargeMinTime;
+    uint16_t tankSolenoidTimeout;
     uint16_t wellRechargeCompleteDepth;
     uint16_t tankMinHousePumpWeight;
     unsigned int tankFillSolenoidPin;
@@ -42,6 +43,8 @@ namespace DataStorage
     int16_t rechargeTimeTarget;
     int16_t wellDataGoodUntil;
     int16_t wellPollTimeTarget;
+    int16_t tankSolenoidTimeoutTarget;
+    bool wellRechargeComplete;
   };
 }
 

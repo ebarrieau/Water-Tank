@@ -20,7 +20,7 @@ volatile int16_t currentSeconds = 0;
 
 // IPAddress* wellIP = new IPAddress(192,168,1,202);
 
-DataStorage::WaterTankData data = {0,0,0,0,0,0,0};
+DataStorage::WaterTankData data = {0,0,0,0,0,0,0,0,true};
 DataStorage::WaterTankSettings settings = {
   40000, //maxWeight
   3000, //maxIncWeight
@@ -28,7 +28,8 @@ DataStorage::WaterTankSettings settings = {
   1750, //wellWorkingDepth
   2000, //wellSafetyDepth
   1800, //wellRechargeMinTime
-  750, //wellRechargeCompleteDepth
+  300, //tankSolenoidTimeout
+  1200, //wellRechargeCompleteDepth
   5000, //tankMinHousePumpWeight
   CONTROLLINO_R2, //tankFillSolenoidPin
   CONTROLLINO_R0, //housePumpContactorPin
@@ -47,10 +48,10 @@ DataStorage::WaterTankSettings settings = {
 void setup()
 {
 
-  Serial.begin(115200);
-  while (!Serial) {
-    ; //wait for serial port to connect
-  }
+  // Serial.begin(115200);
+  // while (!Serial) {
+  //   ; //wait for serial port to connect
+  // }
 
   pinMode(settings.tankFillSolenoidPin, OUTPUT);
   pinMode(settings.housePumpContactorPin, OUTPUT);
@@ -79,6 +80,7 @@ void loop()
   WellClient::poll(settings, data, currentSeconds);
 
   WaterTank::updateWeight(settings, data);
+  WaterTank::updateWellRechargeStatus(settings, data, currentSeconds);
 
   WaterTank::stopTankIfNeeded(settings, data, currentSeconds);
   WaterTank::startTankIfNeeded(settings, data, currentSeconds);

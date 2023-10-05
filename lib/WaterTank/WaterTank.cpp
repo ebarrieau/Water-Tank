@@ -50,9 +50,31 @@ bool WaterTank::tankFillingTimeoutExceeded(DataStorage::WaterTankSettings &setti
     return (WaterTank::tankIsFilling(settings) && SimpleTimer::Ended(now, data.fillingTimeTarget));
 }
 
-bool WaterTank::wellRechargeComplete(DataStorage::WaterTankData &data, uint16_t now)
+void WaterTank::updateWellRechargeStatus(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data, uint16_t now)
+{
+    if (WaterTank::tankIsFilling(settings))
+    {
+        data.wellRechargeComplete = false;
+        return;
+    } else {
+        if (!data.wellRechargeComplete) {
+            bool timeComplete = WaterTank::wellRechargeCompleteTime(data, now);
+            bool depthComplete = WaterTank::wellRechargeCompleteDepth(settings, data);
+            bool solenoidTimeoutComplete = WaterTank::tankSolenoidTimeoutComplete(data, now);
+            data.wellRechargeComplete = timeComplete || (depthComplete && solenoidTimeoutComplete);
+        }
+    }
+
+}
+
+bool WaterTank::wellRechargeCompleteTime(DataStorage::WaterTankData &data, uint16_t now)
 {
     return SimpleTimer::Ended(now, data.rechargeTimeTarget);
+}
+
+bool WaterTank::wellRechargeCompleteDepth(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
+{
+    return data.wellDepth <= settings.wellRechargeCompleteDepth;
 }
 
 bool WaterTank::wellDepthDataIsCurrent(DataStorage::WaterTankData &data, uint16_t now)
@@ -68,6 +90,11 @@ bool WaterTank::housePumpIsRunning(DataStorage::WaterTankSettings &settings)
 bool WaterTank::wellPumpIsRunning(DataStorage::WaterTankSettings &settings)
 {
     return !digitalRead(settings.wellPumpContactorPin);
+}
+
+bool WaterTank::tankSolenoidTimeoutComplete(DataStorage::WaterTankData &data, uint16_t now)
+{
+    return SimpleTimer::Ended(now, data.tankSolenoidTimeoutTarget);
 }
 
 void WaterTank::updateWeight(DataStorage::WaterTankSettings &settings, DataStorage::WaterTankData &data)
@@ -101,6 +128,7 @@ uint8_t WaterTank::stopTankIfNeeded(DataStorage::WaterTankSettings &settings, Da
     {
         digitalWrite(settings.tankFillSolenoidPin, LOW);
         data.rechargeTimeTarget = SimpleTimer::Start(now, settings.wellRechargeMinTime);
+        data.tankSolenoidTimeoutTarget = SimpleTimer::Start(now, settings.tankSolenoidTimeout);
         return 1;
     }
 
@@ -113,7 +141,7 @@ uint8_t WaterTank::startTankIfNeeded(DataStorage::WaterTankSettings &settings, D
     results |= WaterTank::tankIsFilling(settings);
     results |= WaterTank::tankIsNotFull(settings, data) << 1;
     results |= WaterTank::wellIsAtWorkingDepth(settings, data) << 2;
-    results |= WaterTank::wellRechargeComplete(data, now) << 3;
+    results |= data.wellRechargeComplete << 3;
     results |= WaterTank::wellDepthDataIsCurrent(data, now) << 4;
 
     if (results == 0b00011010)
